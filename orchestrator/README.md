@@ -9,10 +9,3 @@ python -m unittest discover -s tests -v
 ```
 
 Safety defaults: metadata-only inputs, no source video download, original sketch generation, private uploads, and mandatory approval before upload preparation.
-
-## Collector modes
-
-- `YOUTUBE_COLLECTOR_MODE=demo`: generates deterministic synthetic metadata and never calls an external service.
-- `YOUTUBE_COLLECTOR_MODE=live`: calls the official `videos.list` `mostPopular` endpoint and requires `YOUTUBE_API_KEY`.
-
-The container exposes `GET /health` and `POST /v1/collect-rank-group` only inside the Compose network. The browser always communicates through the Spring management API.

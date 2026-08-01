@@ -11,7 +11,6 @@ export type ImplementationQueueItem={screenId:string;eventId:string;status:strin
 export type MagazineJob={id:string;groupId?:string;status:string;stage:string;progress:number;format:string;privacyStatus:string;qualityScore?:number;riskScore?:number;createdAt:string};
 export type MagazineVideo={id:string;videoId:string;title:string;channelTitle:string;viewCount:number;likeCount:number;commentCount:number;hotScore:number};
 export type MagazineGroup={id:string;groupTitle:string;topicKeyword:string;itemCount:number;createdAt:string};
-export type MagazineCollection={mode:string;collectedCount:number;savedCount:number;groupId:string;groupTitle:string};
 const json=async<T>(path:string,init?:RequestInit):Promise<T>=>{
   const command=init?.method&&init.method!=="GET";
   const response=await fetch(`/api/v1${path}`,{...init,headers:{"Content-Type":"application/json","X-Request-ID":crypto.randomUUID(),...(command?{"X-Idempotency-Key":crypto.randomUUID(),"X-Actor":"web-user"}:{}),...(init?.headers||{})}});
@@ -42,8 +41,7 @@ export const api={
   magazineJobs:()=>json<MagazineJob[]>("/youtube-magazine/jobs"),
   magazineVideos:()=>json<MagazineVideo[]>("/youtube-magazine/videos"),
   magazineGroups:()=>json<MagazineGroup[]>("/youtube-magazine/groups"),
-  collectMagazineVideos:()=>json<MagazineCollection>("/youtube-magazine/collect",{method:"POST",body:JSON.stringify({regionCode:"KR",categoryId:"24",maxResults:18})}),
-  createMagazineJob:(format:"SHORTS"|"LONGFORM"="SHORTS",groupId?:string)=>json<MagazineJob>("/youtube-magazine/jobs",{method:"POST",body:JSON.stringify({format,groupId})}),
+  createMagazineJob:(format:"SHORTS"|"LONGFORM"="SHORTS")=>json<MagazineJob>("/youtube-magazine/jobs",{method:"POST",body:JSON.stringify({format})}),
   approveMagazineJob:(id:string)=>json<MagazineJob>(`/youtube-magazine/jobs/${id}/approve`,{method:"POST"}),
   prepareMagazineUpload:(id:string)=>json<MagazineJob>(`/youtube-magazine/jobs/${id}/upload`,{method:"POST"})
 };
