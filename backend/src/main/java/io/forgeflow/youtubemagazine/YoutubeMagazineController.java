@@ -10,8 +10,8 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/v1/youtube-magazine")
 public class YoutubeMagazineController {
- private final JdbcTemplate db;private final YoutubeMagazineCollectionService collection;private final YoutubeMagazineGenerationService generation;private final YoutubeMagazineRenderService rendering;private final YoutubeMagazineQualityService quality;
- YoutubeMagazineController(JdbcTemplate db,YoutubeMagazineCollectionService collection,YoutubeMagazineGenerationService generation,YoutubeMagazineRenderService rendering,YoutubeMagazineQualityService quality){this.db=db;this.collection=collection;this.generation=generation;this.rendering=rendering;this.quality=quality;}
+ private final JdbcTemplate db;private final YoutubeMagazineCollectionService collection;private final YoutubeMagazineGenerationService generation;private final YoutubeMagazineRenderService rendering;private final YoutubeMagazineQualityService quality;private final YoutubeMagazineUploadService uploading;
+ YoutubeMagazineController(JdbcTemplate db,YoutubeMagazineCollectionService collection,YoutubeMagazineGenerationService generation,YoutubeMagazineRenderService rendering,YoutubeMagazineQualityService quality,YoutubeMagazineUploadService uploading){this.db=db;this.collection=collection;this.generation=generation;this.rendering=rendering;this.quality=quality;this.uploading=uploading;}
 
  record CreateJob(String groupId,String format){}
  record CollectRequest(String regionCode,String categoryId,Integer maxResults){}
@@ -43,8 +43,7 @@ public class YoutubeMagazineController {
   if(changed==0)throw new IllegalStateException("A passed quality report with quality >= 90 and risk <= 30 is required");return job(id);
  }
  @PostMapping("/jobs/{id}/upload") Map<String,Object> upload(@PathVariable UUID id){
-  int changed=db.update("update youtube_magazine_job set status='UPLOAD_READY',stage='YOUTUBE_UPLOAD',progress=100,updated_at=now() where id=? and status='APPROVED'",id);
-  if(changed==0)throw new IllegalStateException("Approval is required before upload preparation");return job(id);
+  return uploading.prepare(id);
  }
  @GetMapping("/videos") List<Map<String,Object>> videos(){
   return db.queryForList("select id,video_id as \"videoId\",title,channel_title as \"channelTitle\",category_id as \"categoryId\",published_at as \"publishedAt\",view_count as \"viewCount\",like_count as \"likeCount\",comment_count as \"commentCount\",hot_score as \"hotScore\",thumbnail_url as \"thumbnailUrl\",collected_at as \"collectedAt\" from youtube_magazine_video order by hot_score desc");

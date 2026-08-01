@@ -2,6 +2,7 @@ import json
 import os
 import subprocess
 import uuid
+import hashlib
 from datetime import datetime, timedelta, timezone
 from html import escape
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
@@ -176,6 +177,39 @@ def quality_check(payload):
     (target / "quality_report.json").write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
     return report
 
+def prepare_upload(payload):
+    job_id = str(uuid.UUID(str(payload.get("jobId"))))
+    root = Path(os.environ.get("MAGAZINE_OUTPUT_ROOT", "/output")).resolve()
+    target = (root / job_id).resolve()
+    if target.parent != root:
+        raise ValueError("invalid output path")
+    video = target / "preview.mp4"
+    if not video.is_file():
+        raise ValueError("preview video is missing")
+    plan, quality = payload.get("plan", {}), payload.get("quality", {})
+    if not quality.get("passed"):
+        raise ValueError("a passed quality report is required")
+    title = str(plan.get("title", "YouTube Hot 6"))[:100]
+    sources = []
+    for entry in plan.get("entries", []):
+        attribution = entry.get("sourceAttribution", {})
+        video_id = str(attribution.get("videoId", ""))
+        sources.append({"rankNo": entry.get("rankNo"), "channelTitle": attribution.get("channelTitle", ""),
+                        "videoId": video_id, "url": "https://www.youtube.com/watch?v=" + video_id})
+    description = "\uc624\ub298\uc758 \ud654\uc81c \uc601\uc0c1\uc744 \ub7ad\ud0b9\uacfc \ud574\uc124\ub85c \uc815\ub9ac\ud55c \uc624\ub9ac\uc9c0\ub110 \ub9e4\uac70\uc9c4 \ucf58\ud150\uce20\uc785\ub2c8\ub2e4.\n\n\ucc38\uace0 \ucd9c\ucc98:\n" + "\n".join(f"{source['rankNo']}\uc704: {source['url']} ({source['channelTitle']})" for source in sources)
+    digest = hashlib.sha256(video.read_bytes()).hexdigest()
+    thumbnail = target / "upload_thumbnail.svg"
+    thumbnail.write_text(f'''<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="720"><rect width="1280" height="720" fill="#0b0f18"/><text x="640" y="280" text-anchor="middle" font-family="sans-serif" font-size="88" font-weight="bold" fill="#ffffff">YOUTUBE HOT 6</text><text x="640" y="440" text-anchor="middle" font-family="sans-serif" font-size="160" font-weight="bold" fill="#ff4d2e">TOP 6</text><text x="640" y="560" text-anchor="middle" font-family="sans-serif" font-size="34" fill="#9aa5b5">ORIGINAL RANKING MAGAZINE</text></svg>''', encoding="utf-8")
+    blockers = ["technical_preview", "synthetic_test_audio"]
+    package = {"schemaVersion": 1, "jobId": job_id, "readyForApiUpload": False, "blockers": blockers,
+               "video": {"path": f"{job_id}/preview.mp4", "sha256": digest, "sizeBytes": video.stat().st_size},
+               "thumbnail": {"path": f"{job_id}/upload_thumbnail.svg", "width": 1280, "height": 720},
+               "metadata": {"snippet": {"title": title, "description": description, "tags": ["\uc720\ud29c\ube0c\ub7ad\ud0b9", "\ud56b\uc774\uc288", "TOP6", "\uc624\ub298\uc758\uc601\uc0c1"], "categoryId": "24"},
+                            "status": {"privacyStatus": "private", "selfDeclaredMadeForKids": False}},
+               "sources": sources, "qualityScore": quality.get("score"), "riskScore": payload.get("riskScore")}
+    (target / "upload_package.json").write_text(json.dumps(package, ensure_ascii=False, indent=2), encoding="utf-8")
+    return package
+
 class Handler(BaseHTTPRequestHandler):
     def _json(self, status, body):
         data = json.dumps(body, ensure_ascii=False).encode()
@@ -190,6 +224,7 @@ class Handler(BaseHTTPRequestHandler):
             elif self.path == "/v1/generate-magazine": self._json(200, generate_magazine(body))
             elif self.path == "/v1/render-preview": self._json(200, render_preview(body))
             elif self.path == "/v1/quality-check": self._json(200, quality_check(body))
+            elif self.path == "/v1/prepare-upload": self._json(200, prepare_upload(body))
             else: self._json(404, {"error": "not_found"})
         except Exception as exc:
             self._json(422, {"error": type(exc).__name__, "detail": str(exc)[:300]})
