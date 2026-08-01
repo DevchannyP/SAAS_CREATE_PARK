@@ -16,7 +16,7 @@ describe("ForgeFlow integrated workspace",()=>{
    if(url.endsWith("/projects"))return reply([]);
    if(url.includes("/trace"))return reply(trace);
    if(url.includes("/design-snapshots?"))return reply([]);
-   if(url.includes("/implementation-queue?"))return reply([]);
+   if(url.includes("/implementation-queue?"))return reply([{status:"IMPLEMENTATION_READY"}]);
    if(url.endsWith("/design-snapshots/approve"))return reply({state:"IMPLEMENTATION_READY",designVersion:"1"});
    if(url.endsWith("/runs")&&init?.method==="POST")return reply({runId:"run-1",state:"A_REVIEW",phase:"D00_SNAPSHOT_FREEZE",activeAgents:[{id:"product-design",name:"제품·UX 설계 Agent",file:"/harness/design/requirements-agent.md"}]});
    if(url.endsWith("/runs/run-1"))return reply({runId:"run-1",state:"A_REVIEW",phase:"D00_SNAPSHOT_FREEZE",phaseStatus:"RUNNING",activeAgents:[{id:"product-design",name:"제품·UX 설계 Agent",file:"/harness/design/requirements-agent.md"}]});

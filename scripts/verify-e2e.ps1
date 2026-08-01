@@ -63,6 +63,8 @@ $design = PostJson "/api/v1/runs/$($design.runId)/advance" @{evidencePass=$true;
 if ($design.state -ne "A_REVIEW") { throw "Design terminal state failed" }
 $snapshot = PostJson "/api/v1/design-snapshots/approve" @{screenId="SCR-CONSULT-LIST";eventId="EVT-01"}
 if ($snapshot.state -ne "IMPLEMENTATION_READY") { throw "Design approval failed" }
+$queue = Invoke-RestMethod "$BaseUrl/api/v1/implementation-queue?screenId=SCR-CONSULT-LIST&eventId=EVT-01"
+if ($queue.Count -lt 1 -or -not $queue[-1].screenId -or -not $queue[-1].eventId) { throw "Implementation queue contract failed" }
 
 $implement = PostJson "/api/v1/implementation-runs" @{screenId="SCR-CONSULT-LIST";eventId="EVT-01"}
 foreach ($step in 1..12) {

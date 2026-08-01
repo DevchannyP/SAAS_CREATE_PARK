@@ -20,10 +20,10 @@ export function App(){
  const event=useMemo(()=>screen.events.find(x=>x.id===eventId)!,[screen,eventId]);
  const featureKey=`${screenId}/${eventId}`;
  const agents=agentGroups[harnessType||"design"];
- const completedFeatures=useMemo(()=>approvedFeatures.map(key=>{const[approvedScreenId,approvedEventId]=key.split("/");const approvedScreen=screens.find(item=>item.id===approvedScreenId)!;return{key,screen:approvedScreen,event:approvedScreen.events.find(item=>item.id===approvedEventId)!}}),[approvedFeatures]);
+ const completedFeatures=useMemo(()=>approvedFeatures.flatMap(key=>{const[approvedScreenId,approvedEventId]=key.split("/"),approvedScreen=screens.find(item=>item.id===approvedScreenId),approvedEvent=approvedScreen?.events.find(item=>item.id===approvedEventId);return approvedScreen&&approvedEvent?[{key,screen:approvedScreen,event:approvedEvent}]:[]}),[approvedFeatures]);
  const report=(message:string)=>setLogs(v=>[...v.slice(-11),message]);
  const fail=(e:unknown)=>setError(e instanceof Error?e.message:"요청 처리에 실패했습니다.");
- useEffect(()=>{Promise.all([api.trace(screenId,eventId),api.snapshots(screenId,eventId),api.implementationQueue(screenId)]).then(([nextTrace,snapshots,queue])=>{setTrace(nextTrace);setApproved(snapshots.some(item=>item.status==="A_APPROVED"));const ready=queue.filter(item=>item.status==="IMPLEMENTATION_READY").map(item=>`${item.screenId}/${item.eventId}`);setApprovedFeatures(items=>[...new Set([...items,...ready])])}).catch(fail)},[screenId,eventId]);
+ useEffect(()=>{Promise.all([api.trace(screenId,eventId),api.snapshots(screenId,eventId),api.implementationQueue(screenId)]).then(([nextTrace,snapshots,queue])=>{setTrace(nextTrace);setApproved(snapshots.some(item=>item.status==="A_APPROVED"));const ready=queue.filter(item=>item.status==="IMPLEMENTATION_READY"&&item.screenId&&item.eventId).map(item=>`${item.screenId}/${item.eventId}`);setApprovedFeatures(items=>[...new Set([...items,...ready])])}).catch(fail)},[screenId,eventId]);
  useEffect(()=>{api.projects().then(setProjects).catch(fail)},[]);
  useEffect(()=>{if(!run?.runId)return;const timer=setInterval(()=>api.runStatus(run.runId).then(setRun).catch(()=>{}),2000);return()=>clearInterval(timer)},[run?.runId]);
  useEffect(()=>{if(!run?.runId)return;api.evidence(run.runId).then(setEvidence).catch(fail);if(run.state==="HUMAN_TEST")api.gates(run.runId).then(x=>setGate(x[0]||null)).catch(fail)},[run?.runId,run?.phase,run?.state]);
