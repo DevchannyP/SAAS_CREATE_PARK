@@ -10,8 +10,8 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/v1/youtube-magazine")
 public class YoutubeMagazineController {
- private final JdbcTemplate db;private final YoutubeMagazineCollectionService collection;private final YoutubeMagazineGenerationService generation;private final YoutubeMagazineRenderService rendering;private final YoutubeMagazineQualityService quality;
- YoutubeMagazineController(JdbcTemplate db,YoutubeMagazineCollectionService collection,YoutubeMagazineGenerationService generation,YoutubeMagazineRenderService rendering,YoutubeMagazineQualityService quality){this.db=db;this.collection=collection;this.generation=generation;this.rendering=rendering;this.quality=quality;}
+ private final JdbcTemplate db;private final YoutubeMagazineCollectionService collection;private final YoutubeMagazineGenerationService generation;private final YoutubeMagazineRenderService rendering;
+ YoutubeMagazineController(JdbcTemplate db,YoutubeMagazineCollectionService collection,YoutubeMagazineGenerationService generation,YoutubeMagazineRenderService rendering){this.db=db;this.collection=collection;this.generation=generation;this.rendering=rendering;}
 
  record CreateJob(String groupId,String format){}
  record CollectRequest(String regionCode,String categoryId,Integer maxResults){}
@@ -29,7 +29,6 @@ public class YoutubeMagazineController {
  @PostMapping("/jobs/{id}/generate") Map<String,Object> generate(@PathVariable UUID id){return generation.generate(id);}
  @GetMapping("/jobs/{id}/artifacts") List<Map<String,Object>> artifacts(@PathVariable UUID id){return generation.artifacts(id);}
  @PostMapping("/jobs/{id}/render-preview") Map<String,Object> render(@PathVariable UUID id){return rendering.render(id);}
- @PostMapping("/jobs/{id}/quality-check") Map<String,Object> quality(@PathVariable UUID id){return quality.check(id);}
  @GetMapping(value="/jobs/{id}/preview",produces="video/mp4") ResponseEntity<Resource> preview(@PathVariable UUID id){return ResponseEntity.ok().header(HttpHeaders.CONTENT_DISPOSITION,"inline; filename=preview.mp4").contentType(MediaType.valueOf("video/mp4")).body(rendering.preview(id));}
  @Transactional @PostMapping("/jobs") Map<String,Object> create(@RequestBody(required=false) CreateJob request){
   UUID id=UUID.randomUUID();UUID groupId=request==null||request.groupId()==null||request.groupId().isBlank()?null:UUID.fromString(request.groupId());
@@ -39,8 +38,8 @@ public class YoutubeMagazineController {
   return job(id);
  }
  @PostMapping("/jobs/{id}/approve") Map<String,Object> approve(@PathVariable UUID id){
-  int changed=db.update("update youtube_magazine_job set status='APPROVED',stage='HUMAN_APPROVED',progress=95,updated_at=now() where id=? and status='DRAFT' and stage='QUALITY_PASSED' and quality_score>=90 and risk_score<=30",id);
-  if(changed==0)throw new IllegalStateException("A passed quality report with quality >= 90 and risk <= 30 is required");return job(id);
+  int changed=db.update("update youtube_magazine_job set status='APPROVED',stage='HUMAN_APPROVED',progress=95,updated_at=now() where id=? and status='DRAFT' and stage='RENDERED_PREVIEW' and quality_score>=90 and risk_score<=30",id);
+  if(changed==0)throw new IllegalStateException("A rendered preview with quality >= 90 and risk <= 30 is required");return job(id);
  }
  @PostMapping("/jobs/{id}/upload") Map<String,Object> upload(@PathVariable UUID id){
   int changed=db.update("update youtube_magazine_job set status='UPLOAD_READY',stage='YOUTUBE_UPLOAD',progress=100,updated_at=now() where id=? and status='APPROVED'",id);

@@ -16,7 +16,6 @@ export type MagazinePlanEntry={rankNo:number;sourceTitle:string;narration:string
 export type MagazinePlan={title:string;intro:string;entries:MagazinePlanEntry[];outro:string;estimatedDurationSec:number;quality:{score:number};risk:{score:number;level:string}};
 export type MagazineGeneration={jobId:string;stage:string;qualityScore:number;riskScore:number;artifact:MagazinePlan};
 export type MagazineRender={jobId:string;stage:string;manifest:{videoPath:string;durationSec:number;resolution:string;publishable:boolean}};
-export type MagazineQuality={jobId:string;stage:string;qualityScore:number;report:{passed:boolean;score:number;publishable:boolean;measured:Record<string,unknown>;checks:Record<string,boolean>}};
 const json=async<T>(path:string,init?:RequestInit):Promise<T>=>{
   const command=init?.method&&init.method!=="GET";
   const response=await fetch(`/api/v1${path}`,{...init,headers:{"Content-Type":"application/json","X-Request-ID":crypto.randomUUID(),...(command?{"X-Idempotency-Key":crypto.randomUUID(),"X-Actor":"web-user"}:{}),...(init?.headers||{})}});
@@ -51,7 +50,6 @@ export const api={
   createMagazineJob:(format:"SHORTS"|"LONGFORM"="SHORTS",groupId?:string)=>json<MagazineJob>("/youtube-magazine/jobs",{method:"POST",body:JSON.stringify({format,groupId})}),
   generateMagazinePlan:(id:string)=>json<MagazineGeneration>(`/youtube-magazine/jobs/${id}/generate`,{method:"POST"}),
   renderMagazinePreview:(id:string)=>json<MagazineRender>(`/youtube-magazine/jobs/${id}/render-preview`,{method:"POST"}),
-  checkMagazineQuality:(id:string)=>json<MagazineQuality>(`/youtube-magazine/jobs/${id}/quality-check`,{method:"POST"}),
   approveMagazineJob:(id:string)=>json<MagazineJob>(`/youtube-magazine/jobs/${id}/approve`,{method:"POST"}),
   prepareMagazineUpload:(id:string)=>json<MagazineJob>(`/youtube-magazine/jobs/${id}/upload`,{method:"POST"})
 };

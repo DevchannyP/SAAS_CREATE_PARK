@@ -15,4 +15,4 @@ Safety defaults: metadata-only inputs, no source video download, original sketch
 - `YOUTUBE_COLLECTOR_MODE=demo`: generates deterministic synthetic metadata and never calls an external service.
 - `YOUTUBE_COLLECTOR_MODE=live`: calls the official `videos.list` `mostPopular` endpoint and requires `YOUTUBE_API_KEY`.
 
-The container exposes `GET /health`, `POST /v1/collect-rank-group`, `POST /v1/generate-magazine`, `POST /v1/render-preview`, and `POST /v1/quality-check` only inside the Compose network. The browser always communicates through the Spring management API. Render previews are marked non-publishable and stored in the dedicated `/output` volume; quality checks independently measure them with `ffprobe`.
+The container exposes `GET /health`, `POST /v1/collect-rank-group`, `POST /v1/generate-magazine`, and `POST /v1/render-preview` only inside the Compose network. The browser always communicates through the Spring management API. Render previews are marked non-publishable and stored in the dedicated `/output` volume.
