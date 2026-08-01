@@ -51,7 +51,3 @@ A job linked to an exact six-item group can generate a persisted `MAGAZINE_PLAN`
 The orchestrator can produce a non-publishable 1080x1920 FFmpeg technical preview, six original SVG ranking cards, an SRT file, and a `RENDER_MANIFEST`. Files are written to a dedicated Docker volume; the API mounts that volume read-only and streams previews to the console. The audio is an explicit synthetic test tone, not TTS. Approval requires `RENDERED_PREVIEW`, quality >= 90, and risk <= 30.
 
 The separate quality stage uses `ffprobe` to measure the rendered file rather than trusting render metadata. It checks dimensions, H.264 video, an audio stream, preview duration, non-empty output, six subtitle segments, and six rank cards. A persisted `QUALITY_REPORT` and `QUALITY_PASSED` stage are required before human approval.
-
-## Implemented upload-package path
-
-After human approval, the orchestrator creates an `UPLOAD_PACKAGE` containing private-by-default YouTube metadata, a 1280x720 original SVG thumbnail, six source links, the rendered MP4 SHA-256, quality and risk scores, and explicit upload blockers. Technical previews remain `readyForApiUpload=false` because they contain synthetic test audio and are not final renders. No YouTube API write is performed by this stage.
