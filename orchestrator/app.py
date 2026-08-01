@@ -142,6 +142,40 @@ def render_preview(payload):
     (target / "render_manifest.json").write_text(json.dumps(manifest, ensure_ascii=False, indent=2), encoding="utf-8")
     return manifest
 
+def quality_check(payload):
+    job_id = str(uuid.UUID(str(payload.get("jobId"))))
+    root = Path(os.environ.get("MAGAZINE_OUTPUT_ROOT", "/output")).resolve()
+    target = (root / job_id).resolve()
+    if target.parent != root:
+        raise ValueError("invalid output path")
+    video, subtitle = target / "preview.mp4", target / "narration.srt"
+    if not video.is_file() or not subtitle.is_file():
+        raise ValueError("render outputs are incomplete")
+    probe = subprocess.run(["ffprobe", "-v", "error", "-show_entries", "stream=codec_type,codec_name,width,height:format=duration,size", "-of", "json", str(video)], capture_output=True, text=True, timeout=30)
+    if probe.returncode != 0:
+        raise RuntimeError("ffprobe failed: " + probe.stderr[-300:])
+    media = json.loads(probe.stdout)
+    streams = media.get("streams", [])
+    video_stream = next((stream for stream in streams if stream.get("codec_type") == "video"), {})
+    audio_stream = next((stream for stream in streams if stream.get("codec_type") == "audio"), {})
+    duration = float(media.get("format", {}).get("duration", 0))
+    size = int(media.get("format", {}).get("size", 0))
+    subtitle_blocks = subtitle.read_text(encoding="utf-8").count(" --> ")
+    cards = list(target.glob("rank_*.svg"))
+    checks = {"width1080": video_stream.get("width") == 1080, "height1920": video_stream.get("height") == 1920,
+              "h264Video": video_stream.get("codec_name") == "h264", "audioPresent": bool(audio_stream),
+              "previewDuration": 5 <= duration <= 90, "nonEmptyFile": size > 10000,
+              "sixSubtitleSegments": subtitle_blocks == 6, "sixRankCards": len(cards) == 6,
+              "technicalPreviewOnly": True}
+    passed = all(checks.values())
+    score = round(sum(1 for value in checks.values() if value) / len(checks) * 100)
+    report = {"schemaVersion": 1, "jobId": job_id, "passed": passed, "score": score, "publishable": False,
+              "measured": {"width": video_stream.get("width"), "height": video_stream.get("height"), "durationSec": duration,
+                           "sizeBytes": size, "videoCodec": video_stream.get("codec_name"), "audioCodec": audio_stream.get("codec_name"),
+                           "subtitleSegments": subtitle_blocks, "rankCards": len(cards)}, "checks": checks}
+    (target / "quality_report.json").write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
+    return report
+
 class Handler(BaseHTTPRequestHandler):
     def _json(self, status, body):
         data = json.dumps(body, ensure_ascii=False).encode()
@@ -155,6 +189,7 @@ class Handler(BaseHTTPRequestHandler):
             if self.path == "/v1/collect-rank-group": self._json(200, collect_rank_group(body))
             elif self.path == "/v1/generate-magazine": self._json(200, generate_magazine(body))
             elif self.path == "/v1/render-preview": self._json(200, render_preview(body))
+            elif self.path == "/v1/quality-check": self._json(200, quality_check(body))
             else: self._json(404, {"error": "not_found"})
         except Exception as exc:
             self._json(422, {"error": type(exc).__name__, "detail": str(exc)[:300]})
