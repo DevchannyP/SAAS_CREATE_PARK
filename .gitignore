@@ -6,7 +6,5 @@ target/
 .vscode/
 run-data/
 *.log
-__pycache__/
-*.py[cod]
 frontend/playwright-report/
 frontend/test-results/

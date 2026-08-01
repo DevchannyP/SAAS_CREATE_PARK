@@ -1,1 +1,0 @@
-"""FFmpeg magazine template boundary."""

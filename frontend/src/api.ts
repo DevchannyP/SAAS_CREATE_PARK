@@ -8,9 +8,6 @@ export type Project={id:string;name:string;targetPath:string;status:string};
 export type HarnessDraft={agentId:string;content:string;version:number};
 export type DesignSnapshot={screenId:string;eventId:string;designVersion:number;status:string};
 export type ImplementationQueueItem={screenId:string;eventId:string;status:string};
-export type MagazineJob={id:string;groupId?:string;status:string;stage:string;progress:number;format:string;privacyStatus:string;qualityScore?:number;riskScore?:number;createdAt:string};
-export type MagazineVideo={id:string;videoId:string;title:string;channelTitle:string;viewCount:number;likeCount:number;commentCount:number;hotScore:number};
-export type MagazineGroup={id:string;groupTitle:string;topicKeyword:string;itemCount:number;createdAt:string};
 const json=async<T>(path:string,init?:RequestInit):Promise<T>=>{
   const command=init?.method&&init.method!=="GET";
   const response=await fetch(`/api/v1${path}`,{...init,headers:{"Content-Type":"application/json","X-Request-ID":crypto.randomUUID(),...(command?{"X-Idempotency-Key":crypto.randomUUID(),"X-Actor":"web-user"}:{}),...(init?.headers||{})}});
@@ -37,11 +34,5 @@ export const api={
   evidence:(runId:string)=>json<Evidence[]>(`/evidence?runId=${encodeURIComponent(runId)}`),
   gates:(runId:string)=>json<HumanGate[]>(`/human-gates?runId=${encodeURIComponent(runId)}`),
   decideGate:(gateId:string,decision:"APPROVE"|"REJECT")=>json<{state:string;decision:string}>(`/human-gates/${gateId}/decide`,{method:"POST",body:JSON.stringify({decision,actor:"ui-human"})}),
-  cancelRun:(runId:string)=>json<{runId:string;state:string}>(`/runs/${runId}/cancel`,{method:"POST"}),
-  magazineJobs:()=>json<MagazineJob[]>("/youtube-magazine/jobs"),
-  magazineVideos:()=>json<MagazineVideo[]>("/youtube-magazine/videos"),
-  magazineGroups:()=>json<MagazineGroup[]>("/youtube-magazine/groups"),
-  createMagazineJob:(format:"SHORTS"|"LONGFORM"="SHORTS")=>json<MagazineJob>("/youtube-magazine/jobs",{method:"POST",body:JSON.stringify({format})}),
-  approveMagazineJob:(id:string)=>json<MagazineJob>(`/youtube-magazine/jobs/${id}/approve`,{method:"POST"}),
-  prepareMagazineUpload:(id:string)=>json<MagazineJob>(`/youtube-magazine/jobs/${id}/upload`,{method:"POST"})
+  cancelRun:(runId:string)=>json<{runId:string;state:string}>(`/runs/${runId}/cancel`,{method:"POST"})
 };
