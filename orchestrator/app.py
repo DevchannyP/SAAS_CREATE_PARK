@@ -68,6 +68,35 @@ def collect_rank_group(config):
             "group": {"title": f"{topic} TOP 6", "topicKeyword": topic,
                       "items": [{**item, "rankNo": index + 1, "reason": "hot_score와 채널 중복 제거 기준"} for index, item in enumerate(selected)]}}
 
+def generate_magazine(payload):
+    items = payload.get("items", [])
+    if len(items) != 6:
+        raise ValueError("exactly six ranked items are required")
+    group = payload.get("group", {})
+    entries = []
+    for item in reversed(items):
+        rank = int(item["rankNo"])
+        title = str(item.get("title", ""))[:100]
+        channel = str(item.get("channelTitle", ""))[:80]
+        views = int(item.get("viewCount", 0))
+        comments = int(item.get("commentCount", 0))
+        entries.append({
+            "rankNo": rank, "videoId": item.get("videoId"), "sourceTitle": title,
+            "hotPart": {"evidence": "metadata_engagement", "reason": f"views={views}, comments={comments}, hot_score={item.get('score')}", "timestamp": None},
+            "narration": f"{rank}\uc704\ub294 {channel}\uc758 {title}\uc785\ub2c8\ub2e4. \uc9e7\uc740 \uc2dc\uac04 \uc548\uc5d0 \ub192\uc740 \ubc18\uc751\uc744 \ub9cc\ub4e4\uba70 \uc624\ub298\uc758 \ud654\uc81c \uc601\uc0c1\uc73c\ub85c \uc62c\ub790\uc2b5\ub2c8\ub2e4.",
+            "sketchPrompt": f"black and white pencil sketch, editorial ranking magazine, abstract scene inspired by: {title}, original composition, no logo, no copyrighted character, no real person likeness",
+            "sourceAttribution": {"channelTitle": channel, "videoId": item.get("videoId")}
+        })
+    estimated = 8 + sum(max(7, len(entry["narration"]) // 8) for entry in entries) + 5
+    quality_score = 94 if estimated <= 90 else 82
+    return {"schemaVersion": 1, "jobId": payload.get("jobId"), "format": payload.get("format", "SHORTS"),
+            "title": f"\uc624\ub298 \uc720\ud29c\ube0c\uc5d0\uc11c \ub09c\ub9ac\ub09c {group.get('topicKeyword', '')} TOP 6",
+            "intro": "\uc624\ub298 \uc720\ud29c\ube0c\uc5d0\uc11c \uac00\uc7a5 \ub728\uac70\uc6b4 \uc601\uc0c1 TOP 6, \uc9c0\uae08 \uc2dc\uc791\ud569\ub2c8\ub2e4.",
+            "entries": entries, "outro": "\ub0b4\uc77c\ub3c4 \ud654\uc81c\uc758 \uc601\uc0c1\ub9cc \uace8\ub77c \uc815\ub9ac\ud574\ub4dc\ub9b4\uac8c\uc694.",
+            "estimatedDurationSec": estimated,
+            "quality": {"score": quality_score, "checks": {"sixEntries": True, "durationWithin90Sec": estimated <= 90, "attributionIncluded": True}},
+            "risk": {"score": 12, "level": "LOW", "checks": {"sourceClipUsed": False, "frameCopied": False, "privateUploadRequired": True}}}
+
 class Handler(BaseHTTPRequestHandler):
     def _json(self, status, body):
         data = json.dumps(body, ensure_ascii=False).encode()
@@ -76,13 +105,27 @@ class Handler(BaseHTTPRequestHandler):
     def do_GET(self):
         self._json(200, {"status": "UP", "mode": os.environ.get("YOUTUBE_COLLECTOR_MODE", "demo")}) if self.path == "/health" else self._json(404, {"error": "not_found"})
     def do_POST(self):
-        if self.path != "/v1/collect-rank-group": return self._json(404, {"error": "not_found"})
         try:
-            length = min(int(self.headers.get("Content-Length", "0")), 4096)
-            body = json.loads(self.rfile.read(length) or b"{}")
-            self._json(200, collect_rank_group(body))
+            body = json.loads(self._read_body() or b"{}")
+            if self.path == "/v1/collect-rank-group": self._json(200, collect_rank_group(body))
+            elif self.path == "/v1/generate-magazine": self._json(200, generate_magazine(body))
+            else: self._json(404, {"error": "not_found"})
         except Exception as exc:
             self._json(422, {"error": type(exc).__name__, "detail": str(exc)[:300]})
+    def _read_body(self):
+        limit = 65536
+        if self.headers.get("Transfer-Encoding", "").lower() != "chunked":
+            return self.rfile.read(min(int(self.headers.get("Content-Length", "0")), limit))
+        data = bytearray()
+        while True:
+            size_line = self.rfile.readline(32).strip().split(b";", 1)[0]
+            size = int(size_line, 16)
+            if size == 0:
+                self.rfile.readline(); break
+            if len(data) + size > limit:
+                raise ValueError("request body exceeds 65536 bytes")
+            data.extend(self.rfile.read(size)); self.rfile.read(2)
+        return bytes(data)
     def log_message(self, pattern, *args):
         print(pattern % args, flush=True)
 

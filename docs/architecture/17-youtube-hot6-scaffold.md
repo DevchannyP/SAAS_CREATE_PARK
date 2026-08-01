@@ -41,3 +41,7 @@ Implement each disabled DSL stage behind its existing engine namespace. Pass art
 ## Implemented MVP collection path
 
 The isolated `youtube-orchestrator` service now supports demo and live collection modes. The management API calls it through the internal Compose network, persists every collected candidate, and creates a six-item ranked group with duplicate channels removed. The console exposes this flow through the **인기 영상 수집** button. Demo mode is the default; live mode is opt-in through environment configuration.
+
+## Implemented magazine-plan path
+
+A job linked to an exact six-item group can generate a persisted `MAGAZINE_PLAN` artifact. The artifact contains a 6-to-1 countdown, commentary-only narration, metadata-based hot-part evidence, source attribution, original-sketch prompts, estimated duration, quality checks, and content-risk checks. Generation advances a draft job to `SCRIPT_READY`; human approval remains mandatory before upload preparation.
