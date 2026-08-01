@@ -24,4 +24,3 @@ forgeflow:
     image: ${FORGEFLOW_WORKER_IMAGE:}
 youtube-magazine:
   orchestrator-url: ${YOUTUBE_ORCHESTRATOR_URL:http://localhost:8090}
-  output-root: ${YOUTUBE_MAGAZINE_OUTPUT_ROOT:./magazine-output}

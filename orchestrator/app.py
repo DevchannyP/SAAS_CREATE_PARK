@@ -1,11 +1,7 @@
 import json
 import os
-import subprocess
-import uuid
 from datetime import datetime, timedelta, timezone
-from html import escape
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
-from pathlib import Path
 from urllib.parse import urlencode
 from urllib.request import urlopen
 
@@ -101,47 +97,6 @@ def generate_magazine(payload):
             "quality": {"score": quality_score, "checks": {"sixEntries": True, "durationWithin90Sec": estimated <= 90, "attributionIncluded": True}},
             "risk": {"score": 12, "level": "LOW", "checks": {"sourceClipUsed": False, "frameCopied": False, "privateUploadRequired": True}}}
 
-def _srt_time(seconds):
-    return f"00:00:{seconds:02d},000"
-
-def render_preview(payload):
-    job_id = str(uuid.UUID(str(payload.get("jobId"))))
-    plan = payload.get("plan", {})
-    entries = plan.get("entries", [])
-    if len(entries) != 6:
-        raise ValueError("a six-entry magazine plan is required")
-    root = Path(os.environ.get("MAGAZINE_OUTPUT_ROOT", "/output")).resolve()
-    target = (root / job_id).resolve()
-    if target.parent != root:
-        raise ValueError("invalid output path")
-    target.mkdir(parents=True, exist_ok=True)
-    cards = []
-    for entry in entries:
-        rank = int(entry["rankNo"])
-        title = escape(str(entry.get("sourceTitle", ""))[:60])
-        svg = target / f"rank_{rank}.svg"
-        svg.write_text(f'''<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1920"><rect width="1080" height="1920" fill="#0b0f18"/><circle cx="540" cy="680" r="310" fill="none" stroke="#ff4d2e" stroke-width="18"/><text x="540" y="770" text-anchor="middle" font-family="sans-serif" font-size="320" font-weight="bold" fill="#ffffff">{rank}</text><text x="540" y="1160" text-anchor="middle" font-family="sans-serif" font-size="46" fill="#ffffff">{title}</text><text x="540" y="1260" text-anchor="middle" font-family="sans-serif" font-size="30" fill="#8d99aa">ORIGINAL MAGAZINE CARD</text></svg>''', encoding="utf-8")
-        cards.append(svg.name)
-    srt_lines = []
-    for index, entry in enumerate(entries):
-        start, end = index * 2, index * 2 + 2
-        srt_lines.extend([str(index + 1), f"{_srt_time(start)} --> {_srt_time(end)}", str(entry.get("narration", "")), ""])
-    subtitle = target / "narration.srt"; subtitle.write_text("\n".join(srt_lines), encoding="utf-8")
-    video = target / "preview.mp4"
-    command = ["ffmpeg", "-y", "-f", "lavfi", "-i", "color=c=0x0b0f18:s=1080x1920:r=30",
-               "-f", "lavfi", "-i", "sine=frequency=220:sample_rate=48000", "-t", "12",
-               "-vf", "drawbox=x=70:y=70:w=940:h=1780:color=0xff4d2e@0.8:t=8",
-               "-c:v", "libx264", "-preset", "ultrafast", "-pix_fmt", "yuv420p", "-c:a", "aac", "-b:a", "96k", str(video)]
-    completed = subprocess.run(command, capture_output=True, text=True, timeout=120)
-    if completed.returncode != 0:
-        raise RuntimeError("ffmpeg preview render failed: " + completed.stderr[-300:])
-    manifest = {"schemaVersion": 1, "kind": "TECHNICAL_PREVIEW", "publishable": False, "jobId": job_id,
-                "videoPath": f"{job_id}/preview.mp4", "subtitlePath": f"{job_id}/narration.srt", "rankCards": cards,
-                "durationSec": 12, "resolution": "1080x1920", "audio": "synthetic_test_tone",
-                "quality": {"score": 90, "checks": {"resolution": True, "duration": True, "sixCards": len(cards) == 6, "realTts": False}}}
-    (target / "render_manifest.json").write_text(json.dumps(manifest, ensure_ascii=False, indent=2), encoding="utf-8")
-    return manifest
-
 class Handler(BaseHTTPRequestHandler):
     def _json(self, status, body):
         data = json.dumps(body, ensure_ascii=False).encode()
@@ -154,7 +109,6 @@ class Handler(BaseHTTPRequestHandler):
             body = json.loads(self._read_body() or b"{}")
             if self.path == "/v1/collect-rank-group": self._json(200, collect_rank_group(body))
             elif self.path == "/v1/generate-magazine": self._json(200, generate_magazine(body))
-            elif self.path == "/v1/render-preview": self._json(200, render_preview(body))
             else: self._json(404, {"error": "not_found"})
         except Exception as exc:
             self._json(422, {"error": type(exc).__name__, "detail": str(exc)[:300]})

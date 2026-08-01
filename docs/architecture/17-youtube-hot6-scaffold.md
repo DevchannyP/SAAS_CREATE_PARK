@@ -45,7 +45,3 @@ The isolated `youtube-orchestrator` service now supports demo and live collectio
 ## Implemented magazine-plan path
 
 A job linked to an exact six-item group can generate a persisted `MAGAZINE_PLAN` artifact. The artifact contains a 6-to-1 countdown, commentary-only narration, metadata-based hot-part evidence, source attribution, original-sketch prompts, estimated duration, quality checks, and content-risk checks. Generation advances a draft job to `SCRIPT_READY`; human approval remains mandatory before upload preparation.
-
-## Implemented technical-render path
-
-The orchestrator can produce a non-publishable 1080x1920 FFmpeg technical preview, six original SVG ranking cards, an SRT file, and a `RENDER_MANIFEST`. Files are written to a dedicated Docker volume; the API mounts that volume read-only and streams previews to the console. The audio is an explicit synthetic test tone, not TTS. Approval requires `RENDERED_PREVIEW`, quality >= 90, and risk <= 30.
