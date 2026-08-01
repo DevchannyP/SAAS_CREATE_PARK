@@ -34,11 +34,11 @@ if ($threadUpdate.version -ne 2) { throw "Thread optimistic update failed" }
 try { PutJson "/api/v1/threads/$($thread.id)" @{name="stale update"} 1; throw "Stale If-Match accepted" } catch { if ($_.Exception.Message -eq "Stale If-Match accepted") { throw } }
 
 $codeDrafts = Invoke-RestMethod "$BaseUrl/api/v1/harnesses/code/drafts"
-$existingDraft = $codeDrafts | Where-Object agentId -eq "frontend"
+$existingDraft = $codeDrafts | Where-Object agentId -eq "implementation"
 $draftVersion = if ($existingDraft) { [int]$existingDraft.version } else { 0 }
-$draft = PutJson "/api/v1/harnesses/code/drafts/frontend" @{content="# E2E frontend draft`nEvidence Before Score";actor="e2e-user"} $draftVersion
+$draft = PutJson "/api/v1/harnesses/code/drafts/implementation" @{content="# E2E implementation draft`nEvidence Before Score";actor="e2e-user"} $draftVersion
 $diff = Invoke-RestMethod "$BaseUrl/api/v1/harnesses/code/diff"
-if ($draft.version -ne ($draftVersion+1) -or $diff.changedAgents -notcontains "frontend") { throw "Harness draft/diff failed" }
+if ($draft.version -ne ($draftVersion+1) -or $diff.changedAgents -notcontains "implementation") { throw "Harness draft/diff failed" }
 
 $duplicateKey = [guid]::NewGuid().ToString()
 $duplicateProbe = PostJson "/api/v1/runs" @{loopType="DESIGN";screenId="SCR-OWNER-SEARCH";eventId="EVT-32"} $duplicateKey
@@ -81,11 +81,11 @@ $evaluation = Invoke-RestMethod "$BaseUrl/api/v1/evaluations/$($implement.runId)
 if (-not $evaluation.passed -or [int]$evaluation.score -lt 90) { throw "Evidence-backed evaluation failed" }
 
 $harnesses = Invoke-RestMethod "$BaseUrl/api/v1/harnesses/design"
-if ($harnesses.Count -ne 5) { throw "Harness registry failed" }
+if ($harnesses.Count -ne 3) { throw "Harness registry failed" }
 $files = @{}
 foreach ($item in $harnesses) { $files[$item.id] = $item.content }
 $published = PostJson "/api/v1/harnesses/design/publish" @{files=$files}
-if ($published.status -ne "PUBLISHED" -or $published.fileCount -ne 5) { throw "Harness atomic publish failed" }
+if ($published.status -ne "PUBLISHED" -or $published.fileCount -ne 3) { throw "Harness atomic publish failed" }
 
 [ordered]@{
   status = "PASS"

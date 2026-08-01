@@ -1,10 +1,13 @@
 import type {Screen,TraceSummary} from "./types";
 export type HarnessAgent={id:string;name:string;file:string;content:string};
-export type RunStatus={runId:string;state:string;phase:string;loopType?:string;screenId?:string;eventId?:string;evidenceCount?:number};
+export type RunAgent={id:string;name:string;file:string};
+export type RunStatus={runId:string;state:string;phase:string;phaseStatus?:string;loopType?:string;screenId?:string;eventId?:string;evidenceCount?:number;activeAgents?:RunAgent[]};
 export type Evidence={id:string;runId:string;kind:string;artifactPath?:string;contentHash:string;summary:Record<string,unknown>;createdAt:string};
 export type HumanGate={id:string;runId:string;gateType:string;decision?:string};
 export type Project={id:string;name:string;targetPath:string;status:string};
 export type HarnessDraft={agentId:string;content:string;version:number};
+export type DesignSnapshot={screenId:string;eventId:string;designVersion:number;status:string};
+export type ImplementationQueueItem={screenId:string;eventId:string;status:string};
 const json=async<T>(path:string,init?:RequestInit):Promise<T>=>{
   const command=init?.method&&init.method!=="GET";
   const response=await fetch(`/api/v1${path}`,{...init,headers:{"Content-Type":"application/json","X-Request-ID":crypto.randomUUID(),...(command?{"X-Idempotency-Key":crypto.randomUUID(),"X-Actor":"web-user"}:{}),...(init?.headers||{})}});
@@ -15,6 +18,8 @@ export const api={
   screens:()=>json<Screen[]>("/screens"),
   projects:()=>json<Project[]>("/projects"),
   trace:(screenId:string,eventId:string)=>json<TraceSummary>(`/screens/${encodeURIComponent(screenId)}/events/${encodeURIComponent(eventId)}/trace`),
+  snapshots:(screenId:string,eventId:string)=>json<DesignSnapshot[]>(`/design-snapshots?screenId=${encodeURIComponent(screenId)}&eventId=${encodeURIComponent(eventId)}`),
+  implementationQueue:(screenId:string)=>json<ImplementationQueueItem[]>(`/implementation-queue?screenId=${encodeURIComponent(screenId)}`),
   approve:(screenId:string,eventId:string)=>json<{state:string;designVersion:string}>("/design-snapshots/approve",{method:"POST",body:JSON.stringify({screenId,eventId})}),
   reopen:(screenId:string,eventId:string)=>json<{state:string}>("/design-snapshots/reopen",{method:"POST",body:JSON.stringify({screenId,eventId})}),
   run:(loopType:string,screenId:string,eventId:string)=>json<RunStatus>("/runs",{method:"POST",body:JSON.stringify({loopType,screenId,eventId})}),

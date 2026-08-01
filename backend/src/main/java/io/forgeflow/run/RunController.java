@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import io.forgeflow.worker.WorkerRuntimeService;
 import io.forgeflow.workloop.WorkloopService;
+import io.forgeflow.harness.HarnessRegistry;
 
 @RestController @RequestMapping("/api/v1/runs")
 public class RunController {
@@ -18,10 +19,15 @@ public class RunController {
  private final JdbcTemplate db;
  private final WorkerRuntimeService worker;
  private final WorkloopService workloops;
- RunController(JdbcTemplate db,WorkerRuntimeService worker,WorkloopService workloops){this.db=db;this.worker=worker;this.workloops=workloops;}
+ private final HarnessRegistry harnesses;
+ RunController(JdbcTemplate db,WorkerRuntimeService worker,WorkloopService workloops,HarnessRegistry harnesses){this.db=db;this.worker=worker;this.workloops=workloops;this.harnesses=harnesses;}
  @GetMapping("/{runId}") Map<String,Object> status(@PathVariable String runId){
   var rows=db.queryForList("select r.id as \"runId\",r.loop_type as \"loopType\",r.screen_id as \"screenId\",r.event_id as \"eventId\",r.state,r.iteration,p.internal_phase as phase,p.status as \"phaseStatus\",(select count(*) from evidence e where e.run_id=r.id) as \"evidenceCount\" from workloop_run r left join lateral (select internal_phase,status from run_phase where run_id=r.id order by started_at desc nulls last,id desc limit 1) p on true where r.id=?::uuid",runId);
-  if(rows.isEmpty())throw new IllegalArgumentException("Run not found");return rows.getFirst();
+  if(rows.isEmpty())throw new IllegalArgumentException("Run not found");
+  var result=new java.util.LinkedHashMap<String,Object>(rows.getFirst());
+  String loop=String.valueOf(result.get("loopType")),phase="HUMAN_TEST".equals(String.valueOf(result.get("state")))?"C12_HUMAN_TEST":String.valueOf(result.get("phase"));
+  result.put("activeAgents",harnesses.assigned(loop,phase).stream().map(a->Map.of("id",a.id(),"name",a.name(),"file",a.file())).toList());
+  return result;
  }
  @GetMapping(value="/{runId}/events",produces=MediaType.TEXT_EVENT_STREAM_VALUE)
  SseEmitter events(@PathVariable String runId){

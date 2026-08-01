@@ -1,0 +1,15 @@
+.designGrid{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(250px,.65fr);gap:12px}
+.designGrid>article{background:#fff;border:1px solid var(--line);border-radius:18px;padding:14px}
+.designGrid h2{font-size:14px}.mockupCard{grid-row:span 2}
+.ssotCard section{padding:9px 0;border-bottom:1px solid var(--line)}
+.ssotCard section:last-child{border-bottom:0}.ssotCard section>b{display:block;margin-bottom:6px;color:#686177;font-size:11px}
+.ssotCard section>span{display:block;padding:5px 8px;margin-top:4px;border-radius:7px;background:#f2eff8;font:11px monospace}
+.implementationLayout{display:grid;grid-template-columns:250px minmax(0,1fr);gap:12px;min-height:420px;flex:1}
+.featureQueue{padding:12px;border:1px solid var(--line);border-radius:16px;background:#fff;overflow:auto}
+.featureQueue button{display:block;width:100%;text-align:left;margin-bottom:8px}
+.featureQueue small,.featureQueue span{display:block;margin-top:4px}.featureQueue span{font-size:9px;color:var(--green)}
+.featureQueue p{font-size:12px;line-height:1.6;color:#777286}.implementationLayout .codePanel{grid-template-columns:210px minmax(0,1fr)}
+.codeDisabled{opacity:.65}.emptyEditor{display:grid;place-items:center;height:100%;color:#aaa4b8}
+.layers>b{padding:6px 9px;border-radius:8px;background:#f0edf7;color:#665f76;font-weight:500}
+@media(max-width:1100px){.designGrid{grid-template-columns:1fr}.mockupCard{grid-row:auto}.implementationLayout{grid-template-columns:1fr}.featureQueue{max-height:180px}}
+.runOutput{display:grid;grid-template-columns:210px minmax(0,1fr);gap:10px;min-width:0}.agentAssignment{padding:8px;border:1px solid #4a485b;border-radius:10px}.agentAssignment>b,.agentAssignment>span{display:block}.agentAssignment>b{font-size:10px;color:#aaa6ba;margin-bottom:5px}.agentAssignment>span{font-size:10px;color:#bde2ca;margin-top:3px}.harnessContext{display:flex;align-items:center;gap:10px}.harnessContext>b{padding:5px 8px;border-radius:8px;background:var(--soft);color:#514c61}.modal footer>span{margin-right:auto;color:#777286;font-size:11px}
