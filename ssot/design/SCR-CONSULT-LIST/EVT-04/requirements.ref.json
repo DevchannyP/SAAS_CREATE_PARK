@@ -1,0 +1,51 @@
+﻿{
+    "version":  1,
+    "screenId":  "SCR-CONSULT-LIST",
+    "eventId":  "EVT-04",
+    "eventName":  "조회 결과 상세 이동",
+    "eventKind":  "NAVIGATION",
+    "status":  "DRAFT",
+    "sourceRefs":  [
+                       "contracts/event-manifest.json"
+                   ],
+    "contentHash":  "8b2148f9e8b6be525564c6b15627c31288d80addffec4d9c4127ff3b05608545",
+    "requirements":  [
+                         {
+                             "id":  "REQ-04",
+                             "classification":  "FACT",
+                             "trigger":  "조회 결과 상세 이동",
+                             "preconditions":  [
+                                                   "authenticated actor"
+                                               ],
+                             "input":  [
+
+                                       ],
+                             "processing":  [
+                                                "조회 결과 상세 이동"
+                                            ],
+                             "output":  [
+
+                                        ],
+                             "failureCases":  [
+                                                  "FORBIDDEN",
+                                                  "VALIDATION_ERROR",
+                                                  "SYSTEM_ERROR"
+                                              ],
+                             "prohibitedBehaviors":  [
+                                                         "cross-event access"
+                                                     ],
+                             "authorization":  "server enforced",
+                             "transactionType":  "READ_ONLY",
+                             "acceptanceCriteria":  [
+                                                        "event contract preserved"
+                                                    ],
+                             "verificationMethods":  [
+                                                         "contract test"
+                                                     ],
+                             "evidenceRefs":  [
+                                                  "contracts/event-manifest.json"
+                                              ],
+                             "confidence":  1
+                         }
+                     ]
+}

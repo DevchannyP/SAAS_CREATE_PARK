@@ -1,0 +1,51 @@
+﻿{
+    "version":  1,
+    "screenId":  "SCR-CONSULT-REG",
+    "eventId":  "EVT-13",
+    "eventName":  "협의 등록",
+    "eventKind":  "COMMAND",
+    "status":  "DRAFT",
+    "sourceRefs":  [
+                       "contracts/event-manifest.json"
+                   ],
+    "contentHash":  "e0fbe113685cdf95d670f6e57e56b87e43e8054d52ecb10e49e53c98e0e7c266",
+    "requirements":  [
+                         {
+                             "id":  "REQ-13",
+                             "classification":  "FACT",
+                             "trigger":  "협의 등록",
+                             "preconditions":  [
+                                                   "authenticated actor"
+                                               ],
+                             "input":  [
+
+                                       ],
+                             "processing":  [
+                                                "협의 등록"
+                                            ],
+                             "output":  [
+
+                                        ],
+                             "failureCases":  [
+                                                  "FORBIDDEN",
+                                                  "VALIDATION_ERROR",
+                                                  "SYSTEM_ERROR"
+                                              ],
+                             "prohibitedBehaviors":  [
+                                                         "cross-event access"
+                                                     ],
+                             "authorization":  "server enforced",
+                             "transactionType":  "READ_WRITE",
+                             "acceptanceCriteria":  [
+                                                        "event contract preserved"
+                                                    ],
+                             "verificationMethods":  [
+                                                         "contract test"
+                                                     ],
+                             "evidenceRefs":  [
+                                                  "contracts/event-manifest.json"
+                                              ],
+                             "confidence":  1
+                         }
+                     ]
+}

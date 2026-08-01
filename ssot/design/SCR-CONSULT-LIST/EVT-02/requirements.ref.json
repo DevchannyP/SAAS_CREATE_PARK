@@ -1,0 +1,51 @@
+﻿{
+    "version":  1,
+    "screenId":  "SCR-CONSULT-LIST",
+    "eventId":  "EVT-02",
+    "eventName":  "검색조건 기준정보 조회",
+    "eventKind":  "QUERY",
+    "status":  "DRAFT",
+    "sourceRefs":  [
+                       "contracts/event-manifest.json"
+                   ],
+    "contentHash":  "fa727eb6901e6b11678606158b51d6fe3d1aa16c21bfa148e7880bbd26b9a160",
+    "requirements":  [
+                         {
+                             "id":  "REQ-02",
+                             "classification":  "FACT",
+                             "trigger":  "검색조건 기준정보 조회",
+                             "preconditions":  [
+                                                   "authenticated actor"
+                                               ],
+                             "input":  [
+
+                                       ],
+                             "processing":  [
+                                                "검색조건 기준정보 조회"
+                                            ],
+                             "output":  [
+
+                                        ],
+                             "failureCases":  [
+                                                  "FORBIDDEN",
+                                                  "VALIDATION_ERROR",
+                                                  "SYSTEM_ERROR"
+                                              ],
+                             "prohibitedBehaviors":  [
+                                                         "cross-event access"
+                                                     ],
+                             "authorization":  "server enforced",
+                             "transactionType":  "READ_ONLY",
+                             "acceptanceCriteria":  [
+                                                        "event contract preserved"
+                                                    ],
+                             "verificationMethods":  [
+                                                         "contract test"
+                                                     ],
+                             "evidenceRefs":  [
+                                                  "contracts/event-manifest.json"
+                                              ],
+                             "confidence":  1
+                         }
+                     ]
+}

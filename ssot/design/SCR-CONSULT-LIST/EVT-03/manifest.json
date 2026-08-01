@@ -1,0 +1,21 @@
+﻿{
+    "version":  1,
+    "screenId":  "SCR-CONSULT-LIST",
+    "eventId":  "EVT-03",
+    "eventName":  "검색조건 입력·조회 실행",
+    "eventKind":  "QUERY",
+    "status":  "DRAFT",
+    "sourceRefs":  [
+                       "contracts/event-manifest.json"
+                   ],
+    "contentHash":  "07bbf9e1b05c249d72b25a92ff4796d120da71162c0afbca84b509e64a5b30be",
+    "eventManifestHash":  "378770948c4fbe0b86b124426981c8ae6b7ba1572208e8beddd94036820893bc",
+    "artifactRefs":  {
+                         "requirements":  "requirements.ref.json",
+                         "mockup":  "mockup.ref.json",
+                         "apiContract":  "api-contract.ref.json",
+                         "dataModel":  "data-model.ref.json",
+                         "review":  "review.ref.json"
+                     },
+    "designVersion":  1
+}

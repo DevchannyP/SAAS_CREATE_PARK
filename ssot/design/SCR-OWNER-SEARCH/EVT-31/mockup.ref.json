@@ -1,0 +1,25 @@
+﻿{
+    "version":  1,
+    "screenId":  "SCR-OWNER-SEARCH",
+    "eventId":  "EVT-31",
+    "eventName":  "소유인 조회",
+    "eventKind":  "QUERY",
+    "status":  "DRAFT",
+    "sourceRefs":  [
+                       "contracts/event-manifest.json"
+                   ],
+    "contentHash":  "295f344e58fdf9c4af21ba255e646fce86a711f587b35e9d4b129eab4d452faa",
+    "states":  [
+                   "NORMAL",
+                   "EMPTY",
+                   "LOADING",
+                   "ERROR",
+                   "FORBIDDEN"
+               ],
+    "controls":  [
+
+                 ],
+    "fixture":  {
+
+                }
+}

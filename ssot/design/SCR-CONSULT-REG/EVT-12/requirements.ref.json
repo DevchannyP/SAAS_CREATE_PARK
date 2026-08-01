@@ -1,0 +1,51 @@
+﻿{
+    "version":  1,
+    "screenId":  "SCR-CONSULT-REG",
+    "eventId":  "EVT-12",
+    "eventName":  "입력값 검증",
+    "eventKind":  "COMMAND",
+    "status":  "DRAFT",
+    "sourceRefs":  [
+                       "contracts/event-manifest.json"
+                   ],
+    "contentHash":  "2bf9fcac50e7b792e5fd7788a4a7a4c8015c1bb40e118a2662adbaa5d9a04c64",
+    "requirements":  [
+                         {
+                             "id":  "REQ-12",
+                             "classification":  "FACT",
+                             "trigger":  "입력값 검증",
+                             "preconditions":  [
+                                                   "authenticated actor"
+                                               ],
+                             "input":  [
+
+                                       ],
+                             "processing":  [
+                                                "입력값 검증"
+                                            ],
+                             "output":  [
+
+                                        ],
+                             "failureCases":  [
+                                                  "FORBIDDEN",
+                                                  "VALIDATION_ERROR",
+                                                  "SYSTEM_ERROR"
+                                              ],
+                             "prohibitedBehaviors":  [
+                                                         "cross-event access"
+                                                     ],
+                             "authorization":  "server enforced",
+                             "transactionType":  "READ_WRITE",
+                             "acceptanceCriteria":  [
+                                                        "event contract preserved"
+                                                    ],
+                             "verificationMethods":  [
+                                                         "contract test"
+                                                     ],
+                             "evidenceRefs":  [
+                                                  "contracts/event-manifest.json"
+                                              ],
+                             "confidence":  1
+                         }
+                     ]
+}

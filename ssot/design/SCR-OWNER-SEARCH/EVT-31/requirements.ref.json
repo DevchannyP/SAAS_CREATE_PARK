@@ -1,0 +1,51 @@
+﻿{
+    "version":  1,
+    "screenId":  "SCR-OWNER-SEARCH",
+    "eventId":  "EVT-31",
+    "eventName":  "소유인 조회",
+    "eventKind":  "QUERY",
+    "status":  "DRAFT",
+    "sourceRefs":  [
+                       "contracts/event-manifest.json"
+                   ],
+    "contentHash":  "295f344e58fdf9c4af21ba255e646fce86a711f587b35e9d4b129eab4d452faa",
+    "requirements":  [
+                         {
+                             "id":  "REQ-31",
+                             "classification":  "FACT",
+                             "trigger":  "소유인 조회",
+                             "preconditions":  [
+                                                   "authenticated actor"
+                                               ],
+                             "input":  [
+
+                                       ],
+                             "processing":  [
+                                                "소유인 조회"
+                                            ],
+                             "output":  [
+
+                                        ],
+                             "failureCases":  [
+                                                  "FORBIDDEN",
+                                                  "VALIDATION_ERROR",
+                                                  "SYSTEM_ERROR"
+                                              ],
+                             "prohibitedBehaviors":  [
+                                                         "cross-event access"
+                                                     ],
+                             "authorization":  "server enforced",
+                             "transactionType":  "READ_ONLY",
+                             "acceptanceCriteria":  [
+                                                        "event contract preserved"
+                                                    ],
+                             "verificationMethods":  [
+                                                         "contract test"
+                                                     ],
+                             "evidenceRefs":  [
+                                                  "contracts/event-manifest.json"
+                                              ],
+                             "confidence":  1
+                         }
+                     ]
+}

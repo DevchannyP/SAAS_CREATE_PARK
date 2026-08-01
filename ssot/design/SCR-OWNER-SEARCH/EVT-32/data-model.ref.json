@@ -1,0 +1,17 @@
+﻿{
+    "version":  1,
+    "screenId":  "SCR-OWNER-SEARCH",
+    "eventId":  "EVT-32",
+    "eventName":  "농지 상세 연결",
+    "eventKind":  "NAVIGATION",
+    "status":  "DRAFT",
+    "sourceRefs":  [
+                       "contracts/event-manifest.json"
+                   ],
+    "contentHash":  "c9f2d8661b46a63caa52a27137dad7181d0565a19a28a295318b0d60878e8036",
+    "entities":  [
+
+                 ],
+    "readEvents":  null,
+    "writeEvents":  null
+}

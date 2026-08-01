@@ -1,0 +1,25 @@
+﻿{
+    "version":  1,
+    "screenId":  "SCR-ISSUE-HISTORY",
+    "eventId":  "EVT-23",
+    "eventName":  "발급내역 출력",
+    "eventKind":  "EXPORT",
+    "status":  "DRAFT",
+    "sourceRefs":  [
+                       "contracts/event-manifest.json"
+                   ],
+    "contentHash":  "512d60f7179fe94df2ba39e3efcd4029de93a7563c8cfee337daffede5e4e7a8",
+    "states":  [
+                   "NORMAL",
+                   "EMPTY",
+                   "LOADING",
+                   "ERROR",
+                   "FORBIDDEN"
+               ],
+    "controls":  [
+
+                 ],
+    "fixture":  {
+
+                }
+}

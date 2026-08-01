@@ -1,0 +1,17 @@
+﻿{
+    "version":  1,
+    "screenId":  "SCR-ISSUE-HISTORY",
+    "eventId":  "EVT-22",
+    "eventName":  "발급내역 검색",
+    "eventKind":  "QUERY",
+    "status":  "DRAFT",
+    "sourceRefs":  [
+                       "contracts/event-manifest.json"
+                   ],
+    "contentHash":  "7aa042d47b29f09b40b8c1b0241a0af3ca7809c903a51897438e88e838c63726",
+    "operations":  {
+                       "operationId":  "API-22",
+                       "authorization":  "required",
+                       "transactionType":  "READ_ONLY"
+                   }
+}

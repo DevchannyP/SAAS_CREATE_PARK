@@ -1,0 +1,25 @@
+{
+  "version": 1,
+  "screens": [
+    {"id":"SCR-CONSULT-LIST","name":"농지전용협의내역 조회","events":[
+      {"id":"EVT-01","name":"화면 초기화","kind":"QUERY"},
+      {"id":"EVT-02","name":"검색조건 기준정보 조회","kind":"QUERY"},
+      {"id":"EVT-03","name":"검색조건 입력·조회 실행","kind":"QUERY"},
+      {"id":"EVT-04","name":"조회 결과 상세 이동","kind":"NAVIGATION"}]},
+    {"id":"SCR-CONSULT-REG","name":"농지전용협의 등록","events":[
+      {"id":"EVT-11","name":"등록 화면 초기화","kind":"QUERY"},
+      {"id":"EVT-12","name":"입력값 검증","kind":"COMMAND"},
+      {"id":"EVT-13","name":"협의 등록","kind":"COMMAND"}]},
+    {"id":"SCR-ISSUE-HISTORY","name":"농지취득 발급내역 현황","events":[
+      {"id":"EVT-21","name":"발급내역 초기 조회","kind":"QUERY"},
+      {"id":"EVT-22","name":"발급내역 검색","kind":"QUERY"},
+      {"id":"EVT-23","name":"발급내역 출력","kind":"EXPORT"}]},
+    {"id":"SCR-OWNER-SEARCH","name":"농지소유인 조회","events":[
+      {"id":"EVT-31","name":"소유인 조회","kind":"QUERY"},
+      {"id":"EVT-32","name":"농지 상세 연결","kind":"NAVIGATION"}]},
+    {"id":"SCR-COMMON-CODE","name":"공통코드 관리","events":[
+      {"id":"EVT-41","name":"코드그룹 조회","kind":"QUERY"},
+      {"id":"EVT-42","name":"상세코드 저장","kind":"COMMAND"},
+      {"id":"EVT-43","name":"코드 사용중지","kind":"COMMAND"}]}
+  ]
+}

@@ -1,0 +1,21 @@
+﻿{
+    "version":  1,
+    "screenId":  "SCR-OWNER-SEARCH",
+    "eventId":  "EVT-31",
+    "eventName":  "소유인 조회",
+    "eventKind":  "QUERY",
+    "status":  "DRAFT",
+    "sourceRefs":  [
+                       "contracts/event-manifest.json"
+                   ],
+    "contentHash":  "295f344e58fdf9c4af21ba255e646fce86a711f587b35e9d4b129eab4d452faa",
+    "eventManifestHash":  "378770948c4fbe0b86b124426981c8ae6b7ba1572208e8beddd94036820893bc",
+    "artifactRefs":  {
+                         "requirements":  "requirements.ref.json",
+                         "mockup":  "mockup.ref.json",
+                         "apiContract":  "api-contract.ref.json",
+                         "dataModel":  "data-model.ref.json",
+                         "review":  "review.ref.json"
+                     },
+    "designVersion":  1
+}

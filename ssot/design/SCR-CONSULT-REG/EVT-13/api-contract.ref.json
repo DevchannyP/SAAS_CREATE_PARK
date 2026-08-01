@@ -1,0 +1,17 @@
+﻿{
+    "version":  1,
+    "screenId":  "SCR-CONSULT-REG",
+    "eventId":  "EVT-13",
+    "eventName":  "협의 등록",
+    "eventKind":  "COMMAND",
+    "status":  "DRAFT",
+    "sourceRefs":  [
+                       "contracts/event-manifest.json"
+                   ],
+    "contentHash":  "e0fbe113685cdf95d670f6e57e56b87e43e8054d52ecb10e49e53c98e0e7c266",
+    "operations":  {
+                       "operationId":  "API-13",
+                       "authorization":  "required",
+                       "transactionType":  "READ_WRITE"
+                   }
+}

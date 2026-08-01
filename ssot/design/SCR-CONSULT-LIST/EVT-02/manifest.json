@@ -1,0 +1,21 @@
+﻿{
+    "version":  1,
+    "screenId":  "SCR-CONSULT-LIST",
+    "eventId":  "EVT-02",
+    "eventName":  "검색조건 기준정보 조회",
+    "eventKind":  "QUERY",
+    "status":  "DRAFT",
+    "sourceRefs":  [
+                       "contracts/event-manifest.json"
+                   ],
+    "contentHash":  "fa727eb6901e6b11678606158b51d6fe3d1aa16c21bfa148e7880bbd26b9a160",
+    "eventManifestHash":  "378770948c4fbe0b86b124426981c8ae6b7ba1572208e8beddd94036820893bc",
+    "artifactRefs":  {
+                         "requirements":  "requirements.ref.json",
+                         "mockup":  "mockup.ref.json",
+                         "apiContract":  "api-contract.ref.json",
+                         "dataModel":  "data-model.ref.json",
+                         "review":  "review.ref.json"
+                     },
+    "designVersion":  1
+}

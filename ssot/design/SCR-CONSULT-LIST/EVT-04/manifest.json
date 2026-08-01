@@ -1,0 +1,21 @@
+﻿{
+    "version":  1,
+    "screenId":  "SCR-CONSULT-LIST",
+    "eventId":  "EVT-04",
+    "eventName":  "조회 결과 상세 이동",
+    "eventKind":  "NAVIGATION",
+    "status":  "DRAFT",
+    "sourceRefs":  [
+                       "contracts/event-manifest.json"
+                   ],
+    "contentHash":  "8b2148f9e8b6be525564c6b15627c31288d80addffec4d9c4127ff3b05608545",
+    "eventManifestHash":  "378770948c4fbe0b86b124426981c8ae6b7ba1572208e8beddd94036820893bc",
+    "artifactRefs":  {
+                         "requirements":  "requirements.ref.json",
+                         "mockup":  "mockup.ref.json",
+                         "apiContract":  "api-contract.ref.json",
+                         "dataModel":  "data-model.ref.json",
+                         "review":  "review.ref.json"
+                     },
+    "designVersion":  1
+}

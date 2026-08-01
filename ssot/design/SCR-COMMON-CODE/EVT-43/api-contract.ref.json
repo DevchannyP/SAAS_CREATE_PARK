@@ -1,0 +1,17 @@
+﻿{
+    "version":  1,
+    "screenId":  "SCR-COMMON-CODE",
+    "eventId":  "EVT-43",
+    "eventName":  "코드 사용중지",
+    "eventKind":  "COMMAND",
+    "status":  "DRAFT",
+    "sourceRefs":  [
+                       "contracts/event-manifest.json"
+                   ],
+    "contentHash":  "589d8e0bca4eac281b303f06f38d078f6705900a161067477a41dce04c330e8c",
+    "operations":  {
+                       "operationId":  "API-43",
+                       "authorization":  "required",
+                       "transactionType":  "READ_WRITE"
+                   }
+}

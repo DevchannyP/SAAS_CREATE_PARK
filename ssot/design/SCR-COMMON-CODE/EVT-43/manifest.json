@@ -1,0 +1,21 @@
+﻿{
+    "version":  1,
+    "screenId":  "SCR-COMMON-CODE",
+    "eventId":  "EVT-43",
+    "eventName":  "코드 사용중지",
+    "eventKind":  "COMMAND",
+    "status":  "DRAFT",
+    "sourceRefs":  [
+                       "contracts/event-manifest.json"
+                   ],
+    "contentHash":  "589d8e0bca4eac281b303f06f38d078f6705900a161067477a41dce04c330e8c",
+    "eventManifestHash":  "378770948c4fbe0b86b124426981c8ae6b7ba1572208e8beddd94036820893bc",
+    "artifactRefs":  {
+                         "requirements":  "requirements.ref.json",
+                         "mockup":  "mockup.ref.json",
+                         "apiContract":  "api-contract.ref.json",
+                         "dataModel":  "data-model.ref.json",
+                         "review":  "review.ref.json"
+                     },
+    "designVersion":  1
+}

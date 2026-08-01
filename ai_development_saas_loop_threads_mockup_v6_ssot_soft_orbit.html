@@ -1,0 +1,1254 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>AI 설계·코드 생성 SaaS — 통합 목업</title>
+<style>
+:root{
+  --bg:#09101d;--panel:#111a2b;--panel2:#162238;--panel3:#1c2941;
+  --line:#2a3854;--line2:#344663;--text:#eef4ff;--muted:#91a2bd;
+  --blue:#6ea8fe;--blue2:#2f6fed;--green:#47d7a0;--yellow:#ffc857;
+  --red:#ff6b78;--purple:#b692ff;--shadow:0 16px 40px rgba(0,0,0,.25);
+}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{font-family:Inter,Pretendard,"Noto Sans KR",Arial,sans-serif;background:var(--bg);color:var(--text);overflow:hidden}
+button,input,select,textarea{font:inherit}
+button{color:inherit}
+.app{height:100%;display:grid;grid-template-rows:58px 1fr}
+.topbar{display:flex;align-items:center;gap:14px;padding:0 16px;background:#0d1525;border-bottom:1px solid var(--line)}
+.brand{font-weight:850;letter-spacing:-.4px;min-width:235px}
+.brand b{color:var(--blue)}
+.project{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:13px}
+.project select{background:var(--panel2);border:1px solid var(--line);color:var(--text);border-radius:8px;padding:7px 30px 7px 10px}
+.mode-switch{display:flex;background:#09111f;border:1px solid var(--line);border-radius:10px;padding:3px;margin-left:auto}
+.mode-btn{border:0;background:transparent;padding:7px 15px;border-radius:7px;color:var(--muted);cursor:pointer}
+.mode-btn.active{background:var(--blue2);color:white;box-shadow:0 5px 16px rgba(47,111,237,.3)}
+.header-btn{background:var(--panel2);border:1px solid var(--line);padding:8px 12px;border-radius:8px;cursor:pointer}
+.header-btn:hover{border-color:var(--blue)}
+.shell{min-height:0;display:grid;grid-template-columns:265px minmax(0,1fr) 330px}
+.leftbar{min-height:0;background:#0d1626;border-right:1px solid var(--line);display:flex;flex-direction:column;overflow:hidden}
+.leftbar .side-section{flex:1}
+.main{min-width:0;min-height:0;display:grid;grid-template-rows:auto auto minmax(0,1fr) 198px}
+.contextbar{display:flex;align-items:center;gap:8px;padding:9px 13px;background:#0e1728;border-bottom:1px solid var(--line);min-height:48px;overflow:auto}
+.context-label{font-size:12px;color:var(--muted);margin-right:2px;white-space:nowrap}
+.pill{border:1px solid var(--line);background:var(--panel);color:var(--muted);border-radius:999px;padding:6px 11px;cursor:pointer;white-space:nowrap}
+.pill:hover{border-color:var(--blue);color:var(--text)}
+.pill.active{background:rgba(47,111,237,.18);border-color:var(--blue);color:#dce9ff}
+.pill.locked:before{content:"●";font-size:7px;color:var(--green);margin-right:6px;vertical-align:2px}
+.archbar{display:flex;align-items:center;gap:7px;padding:9px 13px;background:#101a2b;border-bottom:1px solid var(--line);overflow:auto}
+.arch-label{color:var(--muted);font-size:12px;margin-right:3px;white-space:nowrap}
+.arch-tab{border:1px solid var(--line);background:#141f33;color:var(--muted);border-radius:7px;padding:7px 11px;cursor:pointer;white-space:nowrap}
+.arch-tab:hover{border-color:var(--blue)}
+.arch-tab.active{color:white;background:#243b68;border-color:#588deb}
+.workspace{min-height:0;overflow:auto;padding:16px;background:
+radial-gradient(circle at 25% 0%,rgba(47,111,237,.08),transparent 30%),
+linear-gradient(180deg,#0c1423,#09101d)}
+.hero{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:14px}
+.eyebrow{font-size:12px;color:var(--blue);font-weight:800;text-transform:uppercase;letter-spacing:.8px}
+h1,h2,h3,p{margin-top:0}
+h1{font-size:23px;margin-bottom:7px}
+h2{font-size:17px}
+.sub{color:var(--muted);font-size:13px;line-height:1.55}
+.status-badge{border:1px solid rgba(71,215,160,.4);background:rgba(71,215,160,.1);color:var(--green);padding:7px 10px;border-radius:8px;font-size:12px;white-space:nowrap}
+.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.screen-card,.event-card,.info-card{background:linear-gradient(180deg,var(--panel2),var(--panel));border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow)}
+.screen-card{padding:15px;cursor:pointer;transition:.18s}
+.screen-card:hover{transform:translateY(-2px);border-color:var(--blue)}
+.card-top{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.module{font-size:11px;color:var(--purple);font-weight:800}
+.count{font-size:11px;color:var(--muted);background:#0d1524;border:1px solid var(--line);border-radius:999px;padding:4px 7px}
+.screen-card h3{font-size:15px;margin:12px 0 6px}
+.card-actions{display:flex;gap:6px;margin-top:13px}
+.mini-btn{border:1px solid var(--line2);background:#17243a;border-radius:7px;padding:6px 9px;color:#cfe0fc;cursor:pointer;font-size:12px}
+.mini-btn.primary{background:var(--blue2);border-color:var(--blue2);color:white}
+.split{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(330px,.85fr);gap:12px;min-height:100%}
+.preview-panel,.code-panel,.detail-panel{background:var(--panel);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.panel-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:11px 13px;background:var(--panel2);border-bottom:1px solid var(--line)}
+.panel-title{font-size:13px;font-weight:800}
+.panel-tools{display:flex;gap:6px}
+.panel-body{padding:14px}
+.browser{border:1px solid #cad2df;border-radius:9px;background:#f5f7fb;color:#1f2937;min-height:390px;overflow:hidden}
+.browser-bar{height:36px;background:#e9edf4;border-bottom:1px solid #cbd5e1;display:flex;align-items:center;gap:6px;padding:0 10px}
+.dot{width:9px;height:9px;border-radius:50%;background:#f87171}.dot:nth-child(2){background:#fbbf24}.dot:nth-child(3){background:#34d399}
+.mock-page{padding:17px}
+.mock-title{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.mock-title h2{font-size:19px;margin:0}
+.mock-filter{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;padding:12px;border:1px solid #d6dce6;border-radius:8px;background:white}
+.field label{font-size:11px;color:#64748b;display:block;margin-bottom:5px}
+.field input,.field select{width:100%;border:1px solid #cbd5e1;border-radius:5px;padding:7px;background:white;color:#334155}
+.mock-actions{display:flex;justify-content:flex-end;gap:7px;margin:10px 0}
+.mock-actions button{border:1px solid #b8c3d3;background:white;border-radius:6px;padding:7px 12px;color:#334155}
+.mock-actions .search{background:#2563eb;color:white;border-color:#2563eb}
+.mock-table{width:100%;border-collapse:collapse;background:white;font-size:12px}
+.mock-table th,.mock-table td{border:1px solid #d9dee7;padding:8px;text-align:left}
+.mock-table th{background:#eef2f7;color:#475569}
+.code{margin:0;background:#0a111d;color:#d7e5ff;padding:15px;min-height:390px;overflow:auto;font:12px/1.65 "Cascadia Code",Consolas,monospace;white-space:pre}
+.kw{color:#c792ea}.fn{color:#82aaff}.str{color:#c3e88d}.cm{color:#63708a}.num{color:#f78c6c}
+.rightbar{min-height:0;background:#0d1626;border-left:1px solid var(--line);display:flex;flex-direction:column;overflow:hidden}
+.rightbar .side-section{flex:1}
+.side-section{min-height:0;display:flex;flex-direction:column;border-bottom:1px solid var(--line)}
+.side-head{padding:12px 13px;background:#121d30;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}
+.side-head h3{font-size:13px;margin:0}
+.side-head span{font-size:11px;color:var(--muted)}
+.side-scroll{padding:9px;overflow:auto}
+.tree-group{margin-bottom:10px}
+.tree-title{font-size:11px;color:var(--muted);padding:6px 7px;text-transform:uppercase;letter-spacing:.7px}
+.tree-btn,.file-btn,.method-btn,.event-filter{width:100%;text-align:left;border:1px solid transparent;background:transparent;border-radius:7px;padding:8px 9px;color:#c0cce0;cursor:pointer;margin-bottom:3px}
+.tree-btn:hover,.file-btn:hover,.method-btn:hover,.event-filter:hover{background:#17243a}
+.tree-btn.active,.file-btn.active,.method-btn.active,.event-filter.active{background:#20365d;border-color:#345e9f;color:white}
+.tree-btn .meta,.file-btn .meta{display:block;color:var(--muted);font-size:10px;margin-top:3px}
+.file{border-left:2px solid #3f5e8f;padding-left:8px;margin:5px 0 8px}
+.file-btn{font-weight:750}
+.method-btn{padding-left:20px;font-size:12px}
+.method-btn:before{content:"ƒ";color:var(--purple);margin-right:7px}
+.empty-side{color:var(--muted);font-size:12px;padding:12px;line-height:1.6}
+.terminal{min-height:0;background:#070c14;border-top:1px solid var(--line);display:grid;grid-template-rows:35px 1fr}
+.term-head{display:flex;align-items:center;justify-content:space-between;padding:0 12px;background:#0d1522;color:var(--muted);font-size:12px}
+.term-tabs{display:flex;gap:15px}.term-tabs b{color:white;border-bottom:2px solid var(--blue);height:35px;display:flex;align-items:center}
+.term-context{font-size:10px;color:var(--green)}
+.term-body{padding:10px 13px;overflow:auto;font:12px/1.6 "Cascadia Code",Consolas,monospace;color:#a8ffcf}
+.prompt{color:var(--blue)}
+.cmd{color:#f3f6fb}
+.term-input{display:flex;align-items:center}
+.term-input input{flex:1;border:0;outline:0;background:transparent;color:#e9f0ff;font:inherit}
+.design-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.event-card{padding:13px;cursor:pointer;transition:.16s}
+.event-card:hover{border-color:var(--blue);transform:translateY(-1px)}
+.event-card.active{border-color:var(--green);box-shadow:0 0 0 1px rgba(71,215,160,.2)}
+.event-id{font-size:11px;color:var(--blue);font-weight:800}
+.event-name{font-size:14px;font-weight:800;margin:7px 0}
+.tags{display:flex;gap:5px;flex-wrap:wrap}
+.tag{font-size:10px;border:1px solid var(--line);color:var(--muted);border-radius:999px;padding:3px 6px}
+.trace{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;margin-top:12px}
+.trace-box{border:1px solid var(--line);background:var(--panel);border-radius:9px;padding:10px}
+.trace-box b{display:block;font-size:18px;color:var(--blue);margin-bottom:3px}
+.trace-box span{font-size:10px;color:var(--muted)}
+.content-list{display:grid;gap:9px}
+.item{background:var(--panel);border:1px solid var(--line);border-radius:9px;padding:12px}
+.item-head{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.item-id{color:var(--blue);font-size:11px;font-weight:900}
+.item h3{font-size:14px;margin:7px 0}
+.item p{color:var(--muted);font-size:12px;line-height:1.55;margin-bottom:0}
+.map-chip{font-size:10px;color:var(--green);border:1px solid rgba(71,215,160,.35);background:rgba(71,215,160,.08);padding:4px 6px;border-radius:6px}
+.table-def{width:100%;border-collapse:collapse;font-size:11px}
+.table-def th,.table-def td{padding:8px;border:1px solid var(--line);text-align:left}
+.table-def th{background:var(--panel2);color:#c9d7ec}
+.erd{position:relative;min-height:380px;border:1px dashed var(--line2);border-radius:10px;background-image:radial-gradient(#2a3854 1px,transparent 1px);background-size:16px 16px;overflow:hidden}
+.entity{position:absolute;width:185px;background:#162238;border:1px solid #47638f;border-radius:8px;box-shadow:var(--shadow)}
+.entity h4{margin:0;padding:8px 10px;background:#20375c;border-radius:7px 7px 0 0;font-size:12px}
+.entity div{padding:5px 9px;font-size:10px;color:#b9c8de;border-top:1px solid #263a5a}
+.relation{position:absolute;height:2px;background:#6ea8fe;transform-origin:left center;opacity:.8}
+.api-box{display:grid;grid-template-columns:100px 1fr;gap:0;border:1px solid var(--line);border-radius:9px;overflow:hidden;margin-bottom:10px}
+.api-method{padding:12px;background:#193353;color:var(--green);font-weight:900}
+.api-path{padding:12px;background:var(--panel);font-family:monospace}
+.review-score{display:grid;grid-template-columns:120px 1fr 48px;align-items:center;gap:10px;margin:9px 0}
+.scorebar{height:8px;background:#0b1321;border-radius:99px;overflow:hidden}
+.scorebar i{display:block;height:100%;background:linear-gradient(90deg,var(--blue2),var(--green));border-radius:99px}
+.score{font-weight:900;color:var(--green)}
+.modal-wrap{position:fixed;inset:0;background:rgba(2,7,14,.72);display:none;align-items:center;justify-content:center;z-index:30}
+.modal-wrap.open{display:flex}
+.modal{width:min(880px,92vw);max-height:88vh;overflow:auto;background:#111b2d;border:1px solid var(--line2);border-radius:14px;box-shadow:0 35px 100px rgba(0,0,0,.5)}
+.modal-head{display:flex;justify-content:space-between;align-items:center;padding:14px 17px;border-bottom:1px solid var(--line)}
+.modal-body{padding:17px}
+.profile-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.profile{border:1px solid var(--line);background:var(--panel);border-radius:10px;padding:12px;cursor:pointer}
+.profile.active{border-color:var(--blue);background:#1b3156}
+.profile h3{font-size:14px;margin-bottom:7px}
+.profile p{font-size:11px;color:var(--muted);line-height:1.5}
+.layer-list{display:flex;flex-wrap:wrap;gap:7px;margin-top:14px}
+.layer-chip{border:1px solid var(--line2);background:#0e1728;border-radius:7px;padding:7px 9px;font-size:11px}
+.modal-foot{display:flex;justify-content:flex-end;gap:8px;padding:13px 17px;border-top:1px solid var(--line)}
+.toast{position:fixed;bottom:215px;right:350px;background:#173259;border:1px solid #4c7cc0;color:white;padding:10px 13px;border-radius:8px;opacity:0;transform:translateY(8px);transition:.2s;pointer-events:none;z-index:40;font-size:12px}
+.toast.show{opacity:1;transform:none}
+@media(max-width:1100px){
+ .shell{grid-template-columns:235px minmax(0,1fr) 285px}
+ .grid,.design-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .split{grid-template-columns:1fr}
+
+}
+
+.thread-tabs{display:flex;align-items:center;gap:6px}
+.thread-tab{border:0;background:transparent;color:var(--muted);height:35px;padding:0 12px;cursor:pointer;border-bottom:2px solid transparent}
+.thread-tab.active{color:white;border-bottom-color:var(--blue)}
+.thread-tab.locked{opacity:.55}
+.thread-console{display:grid;grid-template-columns:230px minmax(0,1fr);gap:12px;height:100%}
+.thread-guide{border:1px solid var(--line);background:#0d1624;border-radius:9px;padding:10px}
+.thread-guide h4{font-size:12px;margin:0 0 5px}
+.thread-guide p{font-size:10px;color:var(--muted);line-height:1.45;margin:0 0 8px}
+.thread-action{width:100%;border:1px solid var(--line2);background:#17345b;color:white;border-radius:7px;padding:8px;cursor:pointer;font-size:11px;font-weight:800}
+.thread-action.primary{background:var(--blue2);border-color:var(--blue2)}
+.thread-action:disabled{opacity:.45;cursor:not-allowed}
+.thread-log{overflow:auto;min-width:0}
+.thread-status{font-size:10px;color:var(--green);margin-bottom:6px}
+.thread-input{display:flex;align-items:center;margin-top:6px;border-top:1px solid #182337;padding-top:6px}
+.thread-input input{flex:1;border:0;outline:0;background:transparent;color:#e9f0ff;font:12px/1.6 "Cascadia Code",Consolas,monospace}
+.profile-toolbar{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:12px 0}
+.profile-form{display:none;margin-top:14px;border:1px solid var(--line2);background:#0d1728;border-radius:10px;padding:13px}
+.profile-form.open{display:block}
+.profile-form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.profile-form label{display:block;font-size:11px;color:var(--muted);margin-bottom:5px}
+.profile-form input,.profile-form textarea{width:100%;background:#101d31;border:1px solid var(--line);color:var(--text);border-radius:7px;padding:8px}
+.profile-form textarea{min-height:74px;resize:vertical}
+.profile-note{font-size:10px;color:var(--muted);line-height:1.45;margin-top:8px}
+.profile-delete{margin-top:8px;border:1px solid rgba(255,107,120,.35);background:rgba(255,107,120,.08);color:#ff9aa5;border-radius:6px;padding:5px 8px;font-size:10px;cursor:pointer}
+
+
+.thread-tab-add,.harness-file-btn{border:1px solid var(--line);background:#142238;color:#d8e6fb;height:27px;min-width:29px;border-radius:6px;cursor:pointer;font-weight:900}
+.thread-tab-add:hover,.harness-file-btn:hover{border-color:var(--blue);background:#1b3155}
+.thread-bar-actions{display:flex;align-items:center;gap:6px;margin-left:4px}
+.thread-type-dot{display:inline-block;width:6px;height:6px;border-radius:50%;margin-right:6px;background:var(--blue)}
+.thread-tab[data-loop-type="IMPLEMENT"] .thread-type-dot{background:var(--green)}
+.thread-create-form{display:grid;gap:12px}
+.thread-create-form label{display:block;font-size:11px;color:var(--muted);margin-bottom:5px}
+.thread-create-form input,.thread-create-form select{width:100%;background:#101d31;border:1px solid var(--line);color:var(--text);border-radius:7px;padding:9px}
+.fixed-note{font-size:10px;color:var(--yellow);line-height:1.45}
+.harness-tabs{display:flex;gap:7px;margin-bottom:10px}
+.harness-tab{border:1px solid var(--line);background:#101b2d;color:var(--muted);border-radius:7px;padding:7px 10px;cursor:pointer}
+.harness-tab.active{border-color:var(--blue);background:#1d3761;color:white}
+.harness-rule-bar{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin:-1px 0 11px}
+.harness-rule-chip{font-size:10px;color:var(--muted);border:1px solid var(--line);background:var(--panel);border-radius:999px;padding:5px 8px}
+.harness-rule-chip.lock{color:var(--green);border-color:rgba(71,215,160,.35);background:rgba(71,215,160,.08)}
+.harness-workspace{display:grid;grid-template-columns:278px minmax(0,1fr);min-height:492px;border:1px solid var(--line2);border-radius:9px;overflow:hidden;background:#09121f}
+.harness-agent-list{padding:9px;background:#0d1728;border-right:1px solid var(--line2);overflow:auto}
+.harness-agent-title{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:10px;color:var(--muted);letter-spacing:.7px;text-transform:uppercase;padding:4px 6px 8px}
+.harness-agent-count{font-size:10px;letter-spacing:0;text-transform:none;border:1px solid var(--line);border-radius:999px;padding:3px 6px}
+.harness-agent-btn{width:100%;display:grid;grid-template-columns:30px minmax(0,1fr);gap:8px;align-items:start;text-align:left;border:1px solid transparent;background:transparent;color:#c7d5e9;border-radius:7px;padding:9px 10px;margin-bottom:4px;cursor:pointer}
+.harness-agent-btn:hover{background:#17243a}
+.harness-agent-btn.active{background:#20365d;border-color:#345e9f;color:white}
+.harness-seq{width:28px;height:28px;display:grid;place-items:center;border:1px solid var(--line2);border-radius:9px;font-size:10px;font-weight:900;color:var(--blue)}
+.harness-agent-btn b{display:block;font-size:12px;margin-bottom:3px}
+.harness-agent-btn span{display:block;color:var(--muted);font-size:10px;line-height:1.35}
+.harness-agent-btn .harness-seq{display:grid;color:var(--blue);font-size:10px;line-height:1}
+.harness-agent-btn.active b{color:inherit}
+.harness-agent-btn em{display:inline-block;margin-top:5px;font-style:normal;font-size:9px;color:var(--green)}
+.harness-editor-panel{display:grid;grid-template-rows:auto auto minmax(0,1fr);padding:12px;min-width:0}
+.harness-editor-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px}
+.harness-file-name{font:11px/1.4 "Cascadia Code",Consolas,monospace;color:var(--green)}
+.harness-agent-kind{font-size:10px;color:var(--blue);border:1px solid rgba(110,168,254,.35);background:rgba(110,168,254,.08);border-radius:999px;padding:4px 7px;white-space:nowrap}
+.harness-agent-summary{display:grid;grid-template-columns:1.2fr .8fr 1fr;gap:7px;margin-bottom:9px}
+.harness-summary-box{min-width:0;border:1px solid var(--line);background:var(--panel);border-radius:8px;padding:8px 9px}
+.harness-summary-box small{display:block;color:var(--muted);font-size:9px;margin-bottom:4px}
+.harness-summary-box b{display:block;font-size:10px;line-height:1.35;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.harness-editor-panel textarea{width:100%;min-height:380px;resize:none;background:#08111e;color:#dce9ff;border:1px solid var(--line2);border-radius:8px;padding:12px;font:12px/1.6 "Cascadia Code",Consolas,monospace}
+.harness-reset{margin-right:auto}
+@media(max-width:760px){.harness-workspace{grid-template-columns:1fr}.harness-agent-list{max-height:220px;border-right:0;border-bottom:1px solid var(--line2)}.harness-agent-summary{grid-template-columns:1fr}.harness-editor-panel textarea{min-height:320px}}
+.implementation-queue{display:grid;gap:10px}
+.queue-card{background:linear-gradient(180deg,var(--panel2),var(--panel));border:1px solid var(--line);border-radius:11px;padding:13px}
+.queue-card.ready{border-color:rgba(71,215,160,.45)}
+.queue-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.queue-title{font-size:14px;font-weight:850;margin:5px 0}
+.queue-meta{font-size:10px;color:var(--muted);line-height:1.5}
+.ssot-strip{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.ssot-chip{font:10px/1.35 "Cascadia Code",Consolas,monospace;color:#d9e8ff;border:1px solid var(--line2);background:#0d1727;border-radius:6px;padding:5px 7px}
+.queue-actions{display:flex;justify-content:flex-end;gap:7px;margin-top:11px}
+
+</style>
+
+<style id="soft-orbit-visual-skin">
+/* Soft Orbit visual skin — layout, copy, DOM and behavior intentionally unchanged */
+:root{
+  --bg:#f7f5fb;
+  --panel:rgba(255,255,255,.92);
+  --panel2:#f4f1fb;
+  --panel3:#ece8f7;
+  --line:#e7e3ef;
+  --line2:#d9d3e7;
+  --text:#25243a;
+  --muted:#76738b;
+  --blue:#6f61d8;
+  --blue2:#5f52c9;
+  --green:#5d9d79;
+  --yellow:#b7793b;
+  --red:#d46e79;
+  --purple:#8d7de8;
+  --shadow:0 18px 50px rgba(66,54,110,.10);
+}
+html,body{background:#f7f5fb}
+body{
+  color:var(--text);
+  background:
+    radial-gradient(circle at 7% 3%,rgba(220,216,255,.65),transparent 25%),
+    radial-gradient(circle at 94% 9%,rgba(255,225,212,.52),transparent 27%),
+    linear-gradient(150deg,#fbfaff,#f3f6fb 62%,#f9f4f2);
+  letter-spacing:-.02em;
+}
+button,input,select,textarea{font-family:inherit}
+button{transition:border-color .18s ease,background .18s ease,box-shadow .18s ease,transform .18s ease}
+button:hover{transform:translateY(-1px)}
+.app{background:transparent}
+.topbar{
+  background:rgba(255,255,255,.78);
+  backdrop-filter:blur(18px);
+  border-bottom:1px solid rgba(231,227,239,.9);
+  box-shadow:0 8px 28px rgba(66,54,110,.06)
+}
+.brand{color:#25243a;font-weight:900;letter-spacing:-.045em}
+.brand b{color:#6f61d8}
+.project{color:var(--muted)}
+.project select,
+.header-btn,
+.mode-switch{
+  background:rgba(255,255,255,.82);
+  border-color:var(--line);
+  color:var(--text);
+  box-shadow:0 6px 18px rgba(66,54,110,.05)
+}
+.project select,.header-btn{border-radius:999px}
+.mode-switch{border-radius:999px}
+.mode-btn{border-radius:999px;color:var(--muted)}
+.mode-btn.active{background:#28283a;color:#fff;box-shadow:0 8px 20px rgba(40,40,58,.16)}
+.header-btn:hover{border-color:#c9c1e8;background:#fff}
+.shell{background:transparent}
+.leftbar,.rightbar{
+  background:rgba(255,255,255,.72);
+  backdrop-filter:blur(14px);
+  border-color:var(--line)
+}
+.side-section{border-color:var(--line)}
+.side-head{background:rgba(244,241,251,.88);border-color:var(--line)}
+.side-head h3{color:#35324b}
+.side-head span{color:var(--muted)}
+.side-scroll{scrollbar-color:#cbc4dc transparent}
+.contextbar,.archbar{
+  background:rgba(255,255,255,.68);
+  border-color:var(--line);
+  backdrop-filter:blur(12px)
+}
+.context-label,.arch-label{color:var(--muted)}
+.pill,.arch-tab{
+  background:rgba(255,255,255,.78);
+  border-color:var(--line);
+  color:var(--muted);
+  border-radius:999px;
+  box-shadow:0 5px 14px rgba(66,54,110,.035)
+}
+.pill:hover,.arch-tab:hover{border-color:#c8c0eb;color:var(--text);background:#fff}
+.pill.active,.arch-tab.active{
+  background:#28283a;
+  border-color:#28283a;
+  color:#fff;
+  box-shadow:0 8px 20px rgba(40,40,58,.14)
+}
+.pill.locked:before{color:#69a685}
+.workspace{
+  background:
+    radial-gradient(circle at 20% 0%,rgba(220,216,255,.38),transparent 30%),
+    radial-gradient(circle at 90% 12%,rgba(220,238,255,.45),transparent 28%),
+    linear-gradient(180deg,rgba(251,250,255,.9),rgba(247,245,251,.98))
+}
+.eyebrow{color:#6f61d8}
+h1,h2,h3{color:#29273d;letter-spacing:-.035em}
+.sub{color:var(--muted)}
+.status-badge,.map-chip{
+  border-color:rgba(93,157,121,.28);
+  background:#e8f3ec;
+  color:#4f8969;
+  border-radius:999px
+}
+.screen-card,.event-card,.info-card,.preview-panel,.code-panel,.detail-panel,.item,.trace-box,.queue-card{
+  background:rgba(255,255,255,.9);
+  border-color:rgba(231,227,239,.95);
+  box-shadow:var(--shadow)
+}
+.screen-card,.event-card,.info-card,.preview-panel,.code-panel,.detail-panel{border-radius:22px}
+.screen-card:hover,.event-card:hover{border-color:#cfc7ee;box-shadow:0 22px 54px rgba(66,54,110,.14)}
+.event-card.active{border-color:#9f92e8;box-shadow:0 0 0 3px rgba(111,97,216,.10),var(--shadow)}
+.card-top,.item-head,.queue-head{color:var(--text)}
+.module,.event-id,.item-id{color:#6f61d8}
+.count,.tag{
+  color:var(--muted);
+  background:#f7f5fb;
+  border-color:var(--line);
+  border-radius:999px
+}
+.mini-btn,.thread-action{
+  background:#fff;
+  border-color:var(--line2);
+  color:#4c4864;
+  border-radius:999px;
+  box-shadow:0 5px 14px rgba(66,54,110,.045)
+}
+.mini-btn:hover,.thread-action:hover{background:#faf8ff;border-color:#beb4e4}
+.mini-btn.primary,.thread-action.primary{
+  background:#28283a;
+  border-color:#28283a;
+  color:#fff;
+  box-shadow:0 8px 20px rgba(40,40,58,.15)
+}
+.panel-head{background:#f4f1fb;border-color:var(--line)}
+.panel-title{color:#35324b}
+.browser{border-color:#ddd8e8;border-radius:18px;box-shadow:0 14px 34px rgba(66,54,110,.08)}
+.browser-bar{background:#f0edf6;border-color:#ded8e8}
+.mock-filter,.mock-table{border-color:#ded9e8}
+.code{
+  background:#28283a;
+  color:#f1eff8;
+  border-radius:0 0 21px 21px
+}
+.kw{color:#c8b8ff}.fn{color:#a9d5ff}.str{color:#d9eaa8}.cm{color:#9390a6}.num{color:#ffc3a8}
+.tree-title{color:#938da2}
+.tree-btn,.file-btn,.method-btn,.event-filter{color:#5f5a74;border-radius:14px}
+.tree-btn:hover,.file-btn:hover,.method-btn:hover,.event-filter:hover{background:#f1eef8}
+.tree-btn.active,.file-btn.active,.method-btn.active,.event-filter.active{
+  background:#e6e1fb;
+  border-color:#d1c9ef;
+  color:#342e61
+}
+.tree-btn .meta,.file-btn .meta,.empty-side{color:var(--muted)}
+.file{border-color:#c5bce9}
+.terminal{
+  background:#28283a;
+  border-color:#3d3c50;
+  box-shadow:0 -12px 34px rgba(40,40,58,.10)
+}
+.term-head{background:#323246;color:#aaa9bb}
+.term-tabs b{color:#fff;border-color:#a99cff}
+.thread-tab{color:#aaa9bb}
+.thread-tab.active{color:#fff;border-color:#a99cff}
+.thread-tab.locked{opacity:.5}
+.thread-tab-add,.harness-file-btn{
+  background:#414158;
+  border-color:#55546d;
+  color:#f4f1fb;
+  border-radius:999px
+}
+.thread-tab-add:hover,.harness-file-btn:hover{background:#4d4c67;border-color:#8880c8}
+.term-context,.thread-status{color:#a8d8bb}
+.thread-console{color:#e9e7f1}
+.thread-guide{background:#35354a;border-color:#48475e;border-radius:18px}
+.thread-guide h4{color:#fff}.thread-guide p{color:#b9b7c6}
+.thread-input{border-color:#45445a}.thread-input input{color:#f6f4fb}
+.term-body{color:#c8f1d7}
+.prompt{color:#b5a8ff}.cmd{color:#fff}
+.trace-box{border-radius:18px}.trace-box b{color:#6f61d8}.trace-box span{color:var(--muted)}
+.item,.queue-card{border-radius:20px}
+.item p,.queue-meta{color:var(--muted)}
+.table-def th{background:#f4f1fb;color:#4d4962}.table-def th,.table-def td{border-color:var(--line)}
+.erd{border-color:#d8d2e4;background-color:#fbfaff;background-image:radial-gradient(#d8d2e4 1px,transparent 1px)}
+.entity{background:#fff;border-color:#bdb3e5;box-shadow:0 15px 36px rgba(66,54,110,.10)}
+.entity h4{background:#e6e1fb;color:#39335f}.entity div{color:#69657b;border-color:#eeeaf4}
+.relation{background:#8f82dd}
+.api-box{border-color:var(--line);border-radius:16px}.api-method{background:#e8f3ec;color:#4f8969}.api-path{background:#fff}
+.scorebar{background:#ece8f2}.scorebar i{background:linear-gradient(90deg,#8d7de8,#9acdb0)}.score{color:#4f8969}
+.modal-wrap{background:rgba(36,32,54,.38);backdrop-filter:blur(9px)}
+.modal{background:#fbfaff;border-color:#ddd7e8;border-radius:28px;box-shadow:0 38px 100px rgba(66,54,110,.22)}
+.modal-head,.modal-foot{border-color:var(--line)}
+.profile{background:#fff;border-color:var(--line);border-radius:18px;box-shadow:0 8px 22px rgba(66,54,110,.05)}
+.profile.active{background:#e7e2fb;border-color:#bdb2e8}
+.layer-chip{background:#fff;border-color:var(--line2);border-radius:999px;color:#5a556e}
+.profile-form{background:#f4f1fb;border-color:var(--line2);border-radius:18px}
+.profile-form input,.profile-form textarea,.thread-create-form input,.thread-create-form select{
+  background:#fff;border-color:var(--line);color:var(--text);border-radius:14px
+}
+.profile-delete{border-radius:999px}
+.harness-tabs{gap:7px}
+.harness-tab{background:#fff;border-color:var(--line);color:var(--muted);border-radius:999px}
+.harness-tab.active{background:#28283a;border-color:#28283a;color:#fff}
+.harness-rule-chip{background:#fff;border-color:var(--line);color:#6d687e}
+.harness-rule-chip.lock{color:#4f8969;border-color:#cfe6d8;background:#edf7f1}
+.harness-workspace{background:#f8f6fc;border-color:var(--line2);border-radius:20px}
+.harness-agent-list{background:#f0edf7;border-color:var(--line2)}
+.harness-agent-title .harness-agent-count{background:#fff;border-color:#ddd7e8;color:#76738b}
+.harness-agent-btn{color:#5d586f;border-radius:14px}
+.harness-agent-btn:hover{background:#e9e5f3}
+.harness-agent-btn.active{background:#ddd7f6;border-color:#c1b7e8;color:#332d5d}
+.harness-seq{background:#fff;border-color:#d7d0ea;color:#6f61d8}
+.harness-agent-btn.active .harness-seq{background:#6f61d8;border-color:#6f61d8;color:#fff}
+.harness-agent-btn em{color:#5d9d79}
+.harness-summary-box{background:#fff;border-color:var(--line);border-radius:14px;color:#4f4a61}
+.harness-editor-panel textarea{background:#28283a;color:#f0eef8;border-color:#49485c;border-radius:16px}
+.harness-file-name{color:#5d9d79}.harness-agent-kind{color:#6558c8;border-color:#cbc2ef;background:#eeeafd}
+.toast{background:#28283a;border-color:#49485c;border-radius:999px;box-shadow:0 18px 45px rgba(40,40,58,.22)}
+.implementation-queue{gap:12px}
+.queue-card.ready{background:linear-gradient(145deg,#ffffff,#faf8ff)}
+.ssot-chip{
+  color:#5b5574;
+  border-color:#ddd7e9;
+  background:#f5f2fa;
+  border-radius:999px
+}
+.fixed-note{color:#a26a35}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+
+</style>
+</head>
+<body>
+<div class="app">
+<header class="topbar">
+  <div class="brand"><b>ForgeFlow</b> AI Development Studio</div>
+  <div class="project"><span>프로젝트</span>
+    <select><option>새올 농업행정 차세대</option><option>AI SaaS 샘플 프로젝트</option></select>
+  </div>
+  <div class="mode-switch">
+    <button class="mode-btn active" data-mode="code">코드·화면</button>
+    <button class="mode-btn" data-mode="design">설계 세팅</button>
+  </div>
+  <button class="header-btn" id="architectureBtn">⚙ 아키텍처 프로필</button>
+  <button class="header-btn" id="saveBtn">저장</button>
+</header>
+
+<div class="shell">
+<aside class="leftbar">
+  <section class="side-section">
+    <div class="side-head"><h3 id="directoryTitle">화면 디렉터리</h3><span id="directoryCount"></span></div>
+    <div class="side-scroll" id="directory"></div>
+  </section>
+</aside>
+
+<main class="main">
+  <div class="contextbar" id="contextBar"></div>
+  <div class="archbar" id="archBar"></div>
+  <section class="workspace" id="workspace"></section>
+  <section class="terminal">
+    <div class="term-head">
+      <div class="thread-tabs" id="threadTabs"></div>
+      <div style="display:flex;align-items:center;gap:10px">
+        <div class="thread-bar-actions">
+          <button class="thread-tab-add" id="addThreadBtn" title="스레드 추가">＋</button>
+          <button class="harness-file-btn" id="harnessFileBtn" title="하네스 설정 파일">📄</button>
+        </div>
+        <div class="term-context" id="termContext">VS CODE CLI · A 스레드</div>
+      </div>
+    </div>
+    <div class="term-body" id="termBody">
+      <div class="thread-console">
+        <div class="thread-guide" id="threadGuide"></div>
+        <div class="thread-log" id="threadLog"></div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<aside class="rightbar">
+  <section class="side-section">
+    <div class="side-head"><h3 id="relatedTitle">관련 파일·메서드</h3><span id="relatedCount"></span></div>
+    <div class="side-scroll" id="related"></div>
+  </section>
+</aside>
+</div>
+</div>
+
+<div class="modal-wrap" id="architectureModal">
+ <div class="modal">
+  <div class="modal-head"><b>설계 세팅 — 아키텍처 프로필</b><button class="header-btn" id="closeModal">닫기</button></div>
+  <div class="modal-body">
+    <p class="sub">저장한 프로필의 계층 순서가 코드 화면 상단 탭과 파일·메서드 필터에 그대로 적용됩니다. 기본 프로필을 쓰거나 프로젝트에 맞는 프로필을 직접 등록할 수 있습니다.</p>
+    <div class="profile-toolbar"><b>등록된 프로필</b><button class="mini-btn primary" id="newProfileBtn">＋ 내 프로필 등록</button></div>
+    <div class="profile-grid" id="profileGrid"></div>
+    <div class="profile-form" id="profileForm">
+      <h3>새 아키텍처 프로필</h3>
+      <div class="profile-form-grid">
+        <div><label>프로필 이름</label><input id="customProfileName" placeholder="예: React + eGovFrame 수직슬라이스"></div>
+        <div><label>간단한 설명</label><input id="customProfileDesc" placeholder="이 프로필의 용도"></div>
+        <div><label>프론트엔드 계층</label><textarea id="customFrontLayers" placeholder="한 줄에 하나씩 입력
+React Screen
+Component
+Hook
+API Client"></textarea></div>
+        <div><label>백엔드 계층</label><textarea id="customBackLayers" placeholder="한 줄에 하나씩 입력
+API Contract
+Controller
+Service
+Mapper
+SQL"></textarea></div>
+      </div>
+      <div class="profile-note">빈 줄은 제거되며 입력한 순서가 상단 아키텍처 탭 순서가 됩니다.</div>
+      <div style="display:flex;justify-content:flex-end;gap:7px;margin-top:10px"><button class="header-btn" id="cancelNewProfile">취소</button><button class="mini-btn primary" id="saveNewProfile">프로필 등록</button></div>
+    </div>
+    <h3 style="margin-top:18px">적용 계층</h3>
+    <div class="layer-list" id="profileLayers"></div>
+  </div>
+  <div class="modal-foot"><button class="header-btn" id="cancelProfile">취소</button><button class="mini-btn primary" id="applyProfile">프로필 적용·저장</button></div>
+ </div>
+</div>
+
+<div class="modal-wrap" id="threadModal">
+ <div class="modal" style="width:min(470px,92vw)">
+  <div class="modal-head"><b>스레드 추가</b><button class="header-btn" id="closeThreadModal">닫기</button></div>
+  <div class="modal-body">
+   <div class="thread-create-form">
+    <div><label>스레드 이름</label><input id="newThreadName" maxlength="24" placeholder="예: 상세 설계 검토"></div>
+    <div><label>고정 루프</label><select id="newThreadType"><option value="DESIGN">설계루프</option><option value="IMPLEMENT">구현루프</option></select></div>
+    <div class="fixed-note">등록 후 이 스레드의 루프 종류는 변경되지 않습니다.</div>
+   </div>
+  </div>
+  <div class="modal-foot"><button class="header-btn" id="cancelThread">취소</button><button class="mini-btn primary" id="saveThread">추가</button></div>
+ </div>
+</div>
+
+<div class="modal-wrap" id="harnessModal">
+ <div class="modal" style="width:min(1060px,95vw)">
+  <div class="modal-head"><b>하네스 설정 파일</b><button class="header-btn" id="closeHarnessModal">닫기</button></div>
+  <div class="modal-body">
+   <p class="sub">화면에는 설계 5개와 코드 5개의 전문 에이전트 하네스만 노출합니다. 각 파일은 내부 생성자·비평자·검증기 구조와 루프·Hard Gate 계약을 직접 편집합니다.</p>
+   <div class="harness-rule-bar">
+    <span class="harness-rule-chip lock">외부 노출 5 + 5 고정</span>
+    <span class="harness-rule-chip">One Artifact · One Writer</span>
+    <span class="harness-rule-chip">독립 평가 후 담당 하네스로 반환</span>
+    <span class="harness-rule-chip">Coordinator · Common · Evals 비노출</span>
+   </div>
+   <div class="harness-tabs">
+    <button class="harness-tab active" data-harness="design">설계 하네스 · 5</button>
+    <button class="harness-tab" data-harness="code">코드 하네스 · 5</button>
+   </div>
+   <div class="harness-workspace">
+    <div class="harness-agent-list" id="harnessAgentList"></div>
+    <div class="harness-editor-panel">
+     <div class="harness-editor-head"><div class="harness-file-name" id="harnessFileName"></div><span class="harness-agent-kind" id="harnessAgentKind"></span></div>
+     <div class="harness-agent-summary">
+      <div class="harness-summary-box"><small>내부 다층 역할</small><b id="harnessAgentFlow"></b></div>
+      <div class="harness-summary-box"><small>단일 쓰기 대상</small><b id="harnessAgentWrites"></b></div>
+      <div class="harness-summary-box"><small>핵심 Hard Gate</small><b id="harnessAgentGate"></b></div>
+     </div>
+     <textarea id="harnessAgentContent" spellcheck="false"></textarea>
+    </div>
+   </div>
+  </div>
+  <div class="modal-foot"><button class="header-btn harness-reset" id="resetHarness">선택 파일 기본값 복원</button><button class="header-btn" id="cancelHarness">취소</button><button class="mini-btn primary" id="saveHarness">하네스 저장</button></div>
+ </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const builtInProfiles={
+ layered:{
+  name:"React + Spring 계층형", desc:"화면에서 SQL까지 직관적으로 추적하는 기본 프로필",
+  front:["React Screen","Component","Hook·Event","Store","API Client","Types","Validation","Front Test"],
+  back:["API Contract","Controller","Service","Domain·Policy","Repository","Mapper","SQL","Back Test"]
+ },
+ clean:{
+  name:"React + Spring Clean", desc:"Application·Domain·Port·Adapter를 분리하는 확장형 프로필",
+  front:["React Screen","Component","UseCase Hook","State","API Port","DTO·Types","Validation","Front Test"],
+  back:["API Contract","Controller","Application","Domain·Policy","Port","Adapter","Mapper·SQL","Back Test"]
+ },
+ nest:{
+  name:"Next.js + NestJS", desc:"TypeScript 풀스택 프로젝트를 위한 모듈형 프로필",
+  front:["Next Page","Component","Hook","Zustand","API Client","Schema·Types","Validation","Front Test"],
+  back:["API Contract","Controller","Provider","Domain","Repository","Prisma","Query","Back Test"]
+ }
+};
+let customProfiles=JSON.parse(localStorage.getItem("ff-custom-profiles")||"{}");
+let profiles={...builtInProfiles,...customProfiles};
+
+const screens=[
+ {id:"SCR-CONSULT-LIST",module:"농지전용",name:"농지전용협의내역 조회",desc:"검색조건 입력, 목록 조회, 상세 이동",events:["EVT-01","EVT-02","EVT-03","EVT-04"]},
+ {id:"SCR-CONSULT-REG",module:"농지전용",name:"농지전용협의 등록",desc:"신규 협의 입력, 검증, 임시저장, 등록",events:["EVT-11","EVT-12","EVT-13"]},
+ {id:"SCR-ISSUE-HISTORY",module:"농지취득",name:"농지취득 발급내역 현황",desc:"발급내역 검색, 상세, 출력",events:["EVT-21","EVT-22","EVT-23"]},
+ {id:"SCR-OWNER-SEARCH",module:"농지대장",name:"농지소유인 조회",desc:"소유인 조건 조회와 농지 연결 확인",events:["EVT-31","EVT-32"]},
+ {id:"SCR-COMMON-CODE",module:"공통",name:"공통코드 관리",desc:"코드그룹, 상세코드, 사용여부 관리",events:["EVT-41","EVT-42","EVT-43"]}
+];
+
+const events=[
+ {id:"EVT-01",screen:"SCR-CONSULT-LIST",name:"화면 초기화",kind:"QUERY",req:["REQ-001","REQ-002"],tables:["CMM_CODE","ORG_SCOPE"],apis:["API-001"],reviews:["REV-001"]},
+ {id:"EVT-02",screen:"SCR-CONSULT-LIST",name:"검색조건 기준정보 조회",kind:"QUERY",req:["REQ-002","REQ-003"],tables:["CMM_CODE","ORG_SCOPE"],apis:["API-002"],reviews:["REV-002"]},
+ {id:"EVT-03",screen:"SCR-CONSULT-LIST",name:"검색조건 입력·조회 실행",kind:"QUERY",req:["REQ-003","REQ-004","REQ-005"],tables:["AGC_CONSULTATION","ORG_SCOPE"],apis:["API-003"],reviews:["REV-003","REV-004"]},
+ {id:"EVT-04",screen:"SCR-CONSULT-LIST",name:"조회 결과 상세 이동",kind:"NAVIGATION",req:["REQ-006"],tables:["AGC_CONSULTATION"],apis:[],reviews:["REV-005"]},
+ {id:"EVT-11",screen:"SCR-CONSULT-REG",name:"등록 화면 초기화",kind:"QUERY",req:["REQ-011"],tables:["CMM_CODE"],apis:["API-011"],reviews:["REV-011"]},
+ {id:"EVT-12",screen:"SCR-CONSULT-REG",name:"입력값 검증",kind:"COMMAND",req:["REQ-012","REQ-013"],tables:["AGC_CONSULTATION"],apis:["API-012"],reviews:["REV-012"]},
+ {id:"EVT-13",screen:"SCR-CONSULT-REG",name:"협의 등록",kind:"COMMAND",req:["REQ-013","REQ-014"],tables:["AGC_CONSULTATION","AGC_CONSULT_HISTORY"],apis:["API-013"],reviews:["REV-013"]},
+ {id:"EVT-21",screen:"SCR-ISSUE-HISTORY",name:"발급내역 초기 조회",kind:"QUERY",req:["REQ-021"],tables:["AGC_ISSUE_HISTORY"],apis:["API-021"],reviews:["REV-021"]},
+ {id:"EVT-22",screen:"SCR-ISSUE-HISTORY",name:"발급내역 검색",kind:"QUERY",req:["REQ-022"],tables:["AGC_ISSUE_HISTORY"],apis:["API-022"],reviews:["REV-022"]},
+ {id:"EVT-23",screen:"SCR-ISSUE-HISTORY",name:"발급내역 출력",kind:"EXPORT",req:["REQ-023"],tables:["AGC_ISSUE_HISTORY"],apis:["API-023"],reviews:["REV-023"]},
+ {id:"EVT-31",screen:"SCR-OWNER-SEARCH",name:"소유인 조회",kind:"QUERY",req:["REQ-031"],tables:["AGC_OWNER","AGC_FARMLAND"],apis:["API-031"],reviews:["REV-031"]},
+ {id:"EVT-32",screen:"SCR-OWNER-SEARCH",name:"농지 상세 연결",kind:"NAVIGATION",req:["REQ-032"],tables:["AGC_OWNER","AGC_FARMLAND"],apis:[],reviews:["REV-032"]},
+ {id:"EVT-41",screen:"SCR-COMMON-CODE",name:"코드그룹 조회",kind:"QUERY",req:["REQ-041"],tables:["CMM_CODE_GROUP"],apis:["API-041"],reviews:["REV-041"]},
+ {id:"EVT-42",screen:"SCR-COMMON-CODE",name:"상세코드 저장",kind:"COMMAND",req:["REQ-042"],tables:["CMM_CODE_GROUP","CMM_CODE"],apis:["API-042"],reviews:["REV-042"]},
+ {id:"EVT-43",screen:"SCR-COMMON-CODE",name:"코드 사용중지",kind:"COMMAND",req:["REQ-043"],tables:["CMM_CODE"],apis:["API-043"],reviews:["REV-043"]}
+];
+
+const requirements=[
+ {id:"REQ-001",title:"화면 진입 권한 확인",body:"활성 사용자와 실행 조직을 기준으로 화면 조회 권한을 확인한 뒤 초기화를 수행한다."},
+ {id:"REQ-002",title:"권한 범위 기준정보 제공",body:"사용자가 선택할 수 있는 기관과 상태코드는 서버가 허용한 범위만 반환한다."},
+ {id:"REQ-003",title:"검색조건 정규화",body:"공백 제거, 기간 상한, 코드 형식, 페이지 크기와 정렬 필드를 서버에서 검증한다."},
+ {id:"REQ-004",title:"기관 범위 강제 적용",body:"클라이언트 입력과 무관하게 인증 사용자의 조회 가능 조직 범위를 최종 조건에 결합한다."},
+ {id:"REQ-005",title:"목록·총건수 일관성",body:"동일한 확정 조건을 사용하여 목록과 총건수를 조회하고 안정 정렬을 적용한다."},
+ {id:"REQ-006",title:"상세 이동 식별자 검증",body:"선택 행의 식별자를 검증하고 상세 화면에서 권한과 존재 여부를 다시 확인한다."},
+ {id:"REQ-011",title:"등록 기준정보 제공",body:"등록 화면에 필요한 코드와 기본값을 권한 확인 후 제공한다."},
+ {id:"REQ-012",title:"입력값 업무 검증",body:"필수값, 날짜, 기관, 신청인 정보와 상태 전이 가능 여부를 검증한다."},
+ {id:"REQ-013",title:"중복 등록 방지",body:"업무 키와 요청 식별자를 사용해 중복 등록과 중복 클릭을 차단한다."},
+ {id:"REQ-014",title:"등록 이력 저장",body:"본 데이터 등록과 동일 트랜잭션에서 생성 이력을 기록한다."},
+ {id:"REQ-021",title:"발급내역 기본 범위",body:"기본 발급기간과 사용자 기관 범위를 적용해 첫 화면을 구성한다."},
+ {id:"REQ-022",title:"발급내역 검색",body:"발급번호, 민원인, 기간, 상태 조건으로 페이징 조회한다."},
+ {id:"REQ-023",title:"출력 권한·마스킹",body:"출력 권한을 확인하고 개인정보 필드를 목적에 맞게 마스킹한다."},
+ {id:"REQ-031",title:"소유인 권한 조회",body:"소유인 식별정보를 최소 수집하고 권한 범위 안의 결과만 조회한다."},
+ {id:"REQ-032",title:"소유인-농지 연결",body:"선택 소유인과 연결된 농지 목록을 동일 권한 범위에서 제공한다."},
+ {id:"REQ-041",title:"코드그룹 목록 조회",body:"사용 가능한 코드그룹과 변경 가능 여부를 조회한다."},
+ {id:"REQ-042",title:"상세코드 저장",body:"코드 중복, 정렬순서, 유효기간을 검증하고 변경 이력을 남긴다."},
+ {id:"REQ-043",title:"사용중지 영향 확인",body:"사용 중인 코드의 참조 영향을 확인한 뒤 논리적 사용중지를 수행한다."}
+];
+
+const tableDefs={
+ "CMM_CODE":[["CODE_GROUP","VARCHAR2(30)","N","PK/FK","코드그룹"],["CODE","VARCHAR2(30)","N","PK","상세코드"],["CODE_NAME","VARCHAR2(100)","N","","표시명"],["USE_YN","CHAR(1)","N","","사용 여부"]],
+ "ORG_SCOPE":[["USER_ID","VARCHAR2(30)","N","PK","사용자"],["ORG_CODE","VARCHAR2(10)","N","PK","조회 가능 조직"],["VALID_TO","DATE","Y","","권한 종료일"]],
+ "AGC_CONSULTATION":[["CONSULTATION_ID","VARCHAR2(20)","N","PK","협의 ID"],["REQUEST_ORG_CODE","VARCHAR2(10)","N","IDX","요청기관"],["APPLICANT_NAME","VARCHAR2(100)","N","","신청인"],["STATUS_CODE","VARCHAR2(20)","N","IDX","처리상태"],["VERSION_NO","NUMBER(10)","N","","낙관적 잠금"]],
+ "AGC_CONSULT_HISTORY":[["HISTORY_ID","NUMBER","N","PK","이력 ID"],["CONSULTATION_ID","VARCHAR2(20)","N","FK","협의 ID"],["ACTION_CODE","VARCHAR2(20)","N","","처리행위"],["ACTOR_ID","VARCHAR2(30)","N","","처리자"]],
+ "AGC_ISSUE_HISTORY":[["ISSUE_NO","VARCHAR2(30)","N","PK","발급번호"],["ISSUE_DATE","DATE","N","IDX","발급일"],["APPLICANT_NAME","VARCHAR2(100)","N","","민원인"],["ISSUE_STATUS","VARCHAR2(20)","N","IDX","발급상태"]],
+ "AGC_OWNER":[["OWNER_ID","VARCHAR2(30)","N","PK","소유인 ID"],["OWNER_NAME","VARCHAR2(100)","N","","소유인명"],["RRN_HASH","VARCHAR2(128)","Y","UQ","식별정보 해시"]],
+ "AGC_FARMLAND":[["FARMLAND_ID","VARCHAR2(30)","N","PK","농지 ID"],["OWNER_ID","VARCHAR2(30)","N","FK/IDX","소유인 ID"],["REGN_CODE","VARCHAR2(10)","N","IDX","법정동 코드"]],
+ "CMM_CODE_GROUP":[["CODE_GROUP","VARCHAR2(30)","N","PK","코드그룹"],["GROUP_NAME","VARCHAR2(100)","N","","그룹명"],["EDITABLE_YN","CHAR(1)","N","","수정 가능 여부"]]
+};
+
+const apis={
+ "API-001":{method:"GET",path:"/api/screens/consultations/init",desc:"화면 초기화와 진입 권한 확인"},
+ "API-002":{method:"GET",path:"/api/consultations/filter-options",desc:"권한 범위 검색조건 기준정보"},
+ "API-003":{method:"GET",path:"/api/consultations",desc:"검증된 조건으로 협의 목록 조회"},
+ "API-011":{method:"GET",path:"/api/consultations/new",desc:"등록 화면 초기 데이터"},
+ "API-012":{method:"POST",path:"/api/consultations/validate",desc:"등록 전 업무 검증"},
+ "API-013":{method:"POST",path:"/api/consultations",desc:"협의 신규 등록"},
+ "API-021":{method:"GET",path:"/api/issues/init",desc:"발급내역 화면 초기화"},
+ "API-022":{method:"GET",path:"/api/issues",desc:"발급내역 페이징 검색"},
+ "API-023":{method:"POST",path:"/api/issues/export",desc:"권한·마스킹 적용 출력"},
+ "API-031":{method:"GET",path:"/api/owners",desc:"소유인 조건 조회"},
+ "API-041":{method:"GET",path:"/api/code-groups",desc:"공통코드 그룹 조회"},
+ "API-042":{method:"PUT",path:"/api/code-groups/{group}/codes/{code}",desc:"상세코드 저장"},
+ "API-043":{method:"DELETE",path:"/api/code-groups/{group}/codes/{code}",desc:"코드 사용중지"}
+};
+
+const reviews={
+ "REV-001":["권한 선행성",98,"권한 확인 전 기준정보 조회가 발생하지 않도록 호출 순서를 고정."],
+ "REV-002":["권한 범위 축소",99,"화면 후보와 최종 조회 조건 모두 서버 권한범위로 제한."],
+ "REV-003":["입력 검증·보안",99,"조작 가능한 페이지·정렬·기관·기간을 서버에서 재검증."],
+ "REV-004":["조회 성능",97,"복합 인덱스와 안정 정렬 적용, 대량 조건 성능 측정 필요."],
+ "REV-005":["상세 이동 안전성",98,"상세 진입 시 식별자·권한·존재 여부 재검증."],
+ "REV-011":["초기값 일관성",97,"등록 기본값을 서버 계약으로 단일화."],
+ "REV-012":["검증 완전성",98,"형식 검증과 업무 검증을 분리하고 오류 코드를 표준화."],
+ "REV-013":["원자성·중복 방지",99,"업무 데이터와 이력을 한 트랜잭션으로 처리하고 멱등키 적용."],
+ "REV-021":["초기 조회 범위",97,"기간 상한과 기관 범위 적용."],
+ "REV-022":["조회 성능",98,"발급일·기관·상태 인덱스 후보 검증."],
+ "REV-023":["개인정보 보호",99,"출력 권한과 필드별 마스킹 정책 적용."],
+ "REV-031":["민감정보 최소화",99,"원문 식별정보 검색을 제한하고 해시·마스킹 사용."],
+ "REV-032":["연결 권한 일치",98,"소유인과 농지 조회에 동일 권한 기준 사용."],
+ "REV-041":["관리 권한",98,"코드그룹별 수정 가능 권한 분리."],
+ "REV-042":["정합성",99,"중복·유효기간·정렬순서 검증과 이력 저장."],
+ "REV-043":["참조 영향",97,"사용중지 전 참조 영향 자동검사 필요."]
+};
+
+function filesFor(screenId, side, layer){
+ const s=screens.find(x=>x.id===screenId); if(!s)return[];
+ const base=s.name.replaceAll(" ","");
+ const map={
+  "React Screen":[[base+"Page.tsx",["renderScreen()","handleScreenInit()"]]],
+  "Component":[["SearchConditionPanel.tsx",["handleChange()","handleReset()"]],["ResultGrid.tsx",["handleRowClick()","renderStatusCell()"]]],
+  "Hook·Event":[["use"+base+".ts",["initialize()","search()","openDetail()"]]],
+  "Store":[[base+"Store.ts",["setCriteria()","setResult()","reset()"]]],
+  "API Client":[[base+"Api.ts",["fetchInit()","fetchList()","fetchDetail()"]]],
+  "Types":[[base+"Types.ts",["SearchCriteria","ListResponse","RowModel"]]],
+  "Validation":[[base+"Schema.ts",["normalizeCriteria()","validateDateRange()"]]],
+  "Front Test":[[base+".test.tsx",["rendersInitialState()","searchesWithCriteria()","blocksDuplicateClick()"]]],
+  "API Contract":[["consultation-api.yaml",["GET /init","GET /list","POST /save"]]],
+  "Controller":[[base+"Controller.java",["initialize()","search()","create()"]]],
+  "Service":[[base+"Service.java",["load()","search()","register()","validateScope()"]]],
+  "Domain·Policy":[[base+"Policy.java",["requireViewPermission()","validateStatusTransition()"]]],
+  "Repository":[[base+"Repository.java",["findPage()","findById()","save()"]]],
+  "Mapper":[[base+"Mapper.java",["selectList()","selectCount()","insert()"]]],
+  "SQL":[[base+"Mapper.xml",["selectConsultations","countConsultations","insertConsultation"]]],
+  "Back Test":[[base+"ServiceTest.java",["rejectsOutOfScopeOrg()","preventsDuplicateRequest()","rollsBackHistoryFailure()"]]]
+ };
+ return (map[layer]||[[base+"Overview",["select a layer"]]]).map(([f,m])=>({file:f,methods:m}));
+}
+
+let state={
+ mode:"code", codeScope:"ALL", screen:"ALL", layer:"ALL", method:null,
+ designTab:"ALL", event:"ALL", profile:localStorage.getItem("ff-profile")||"layered", pendingProfile:null,
+ thread:"A", aApproved:localStorage.getItem("ff-a-approved")==="true",
+ threads:JSON.parse(localStorage.getItem("ff-threads")||"null")||[
+   {id:"A",name:"A 스레드",loopType:"DESIGN",builtIn:true},
+   {id:"B",name:"B 스레드",loopType:"IMPLEMENT",builtIn:true}
+ ],
+ threadLogs:JSON.parse(localStorage.getItem("ff-thread-logs")||"{}")
+};
+
+const $=s=>document.querySelector(s);
+function toast(msg){const t=$("#toast");t.textContent=msg;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),1600)}
+function currentScreen(){return screens.find(s=>s.id===state.screen)}
+function currentEvent(){return events.find(e=>e.id===state.event)}
+function implementationQueue(){
+ if(!state.aApproved)return [];
+ const scoped=state.screen==="ALL"?events:events.filter(e=>e.screen===state.screen);
+ return scoped.map(e=>({
+  event:e, screen:screens.find(s=>s.id===e.screen),
+  ssot:[
+   `/ssot/design/${e.screen}/${e.id}/manifest.json`,
+   `/ssot/design/${e.screen}/${e.id}/requirements.ref.json`,
+   `/ssot/design/${e.screen}/${e.id}/api-contract.ref.json`,
+   `/ssot/design/${e.screen}/${e.id}/data-model.ref.json`
+  ]
+ }));
+}
+function layers(){
+ const p=profiles[state.profile];
+ if(state.codeScope==="FRONT")return p.front;
+ if(state.codeScope==="BACK")return p.back;
+ return [...p.front,...p.back];
+}
+function currentThread(){return state.threads.find(t=>t.id===state.thread)||state.threads[0]}
+function isImplementationThread(t=currentThread()){return t.loopType==="IMPLEMENT"}
+function saveThreads(){localStorage.setItem("ff-threads",JSON.stringify(state.threads))}
+function saveThreadLogs(){localStorage.setItem("ff-thread-logs",JSON.stringify(state.threadLogs))}
+function renderThreadTabs(){
+ const tabs=$("#threadTabs");
+ tabs.innerHTML=state.threads.map(t=>`<button class="thread-tab ${state.thread===t.id?"active":""} ${t.loopType==="IMPLEMENT"&&!state.aApproved?"locked":""}" data-thread="${t.id}" data-loop-type="${t.loopType}"><span class="thread-type-dot"></span>${t.name} · ${t.loopType==="DESIGN"?"설계":"구현"}</button>`).join("");
+ tabs.querySelectorAll("[data-thread]").forEach(b=>b.onclick=()=>{
+   const t=state.threads.find(x=>x.id===b.dataset.thread);
+   if(t.loopType==="IMPLEMENT"&&!state.aApproved){toast("설계루프를 먼저 확정하세요.");return}
+   state.thread=t.id;updateTerm();
+ });
+}
+function updateTerm(){
+ const t=currentThread(), loopName=t.loopType==="DESIGN"?"설계루프":"구현루프";
+ renderThreadTabs();
+ $("#termContext").textContent=`VS CODE CLI · ${t.name} · ${loopName} · ${state.screen}`;
+ renderThreadGuide();
+ renderThreadLog();
+}
+function renderThreadGuide(){
+ const guide=$("#threadGuide"), t=currentThread();
+ if(t.loopType==="DESIGN"){
+   guide.innerHTML=`<h4>${t.name} · 설계루프</h4><p>이벤트 → 요구사항 → 목업 → 테이블을 만들고 검토·개선한 뒤 설계를 확정합니다.</p><button class="thread-action primary" id="runThread">설계 시작</button>${state.aApproved?'<button class="thread-action" id="reopenA" style="margin-top:6px">설계 다시 열기</button>':'<button class="thread-action" id="approveA" style="margin-top:6px">설계 확정</button>'}`;
+ }else{
+   guide.innerHTML=`<h4>${t.name} · 구현루프</h4><p>확정 설계를 받아 프론트·백엔드 코드를 생성하고 평가·개선을 반복합니다.</p><button class="thread-action primary" id="runThread" ${state.aApproved?'':'disabled'}>구현 시작</button><button class="thread-action" id="evaluateB" style="margin-top:6px" ${state.aApproved?'':'disabled'}>코드 평가·개선</button>`;
+ }
+ const run=$("#runThread"); if(run)run.onclick=()=>appendThreadLog(t.loopType==="DESIGN"?"선택 화면의 설계루프를 시작했습니다.":"확정 설계 기반 구현루프를 시작했습니다.");
+ const approve=$("#approveA"); if(approve)approve.onclick=()=>{state.aApproved=true;localStorage.setItem("ff-a-approved","true");appendThreadLog("설계를 확정했습니다. 구현루프 잠금이 해제되었습니다.");updateTerm()};
+ const reopen=$("#reopenA"); if(reopen)reopen.onclick=()=>{state.aApproved=false;localStorage.setItem("ff-a-approved","false");appendThreadLog("설계를 다시 열었습니다. 구현루프가 잠겼습니다.");updateTerm()};
+ const ev=$("#evaluateB"); if(ev)ev.onclick=()=>appendThreadLog("선택 코드의 품질·보안·성능·안정성 평가와 개선루프를 시작했습니다.");
+}
+function renderThreadLog(){
+ const t=currentThread(), logs=state.threadLogs[t.id]||[];
+ const status=t.loopType==="DESIGN"?(state.aApproved?"설계 확정 완료 · 구현루프를 실행할 수 있습니다.":"설계루프 준비 · 선택 화면의 설계를 시작할 수 있습니다."):(state.aApproved?"구현루프 준비 · 확정 설계 기준으로 구현합니다.":"구현루프 잠금 · 설계 확정이 필요합니다.");
+ const label=t.loopType==="DESIGN"?"설계":"구현";
+ const placeholder=t.loopType==="DESIGN"?"예: 선택 화면의 이벤트와 요구사항을 설계해줘":(state.aApproved?"예: EVT-03 프론트와 백엔드 코드를 만들어줘":"설계루프를 먼저 확정하세요");
+ $("#threadLog").innerHTML=`<div class="thread-status">${status}</div><div>화면=${state.screen} · 이벤트=${state.event} · 계층=${state.layer}</div>${logs.map(x=>`<div style="margin-bottom:5px"><span class="prompt">${t.name}</span><span class="cmd"> &gt; ${x}</span></div>`).join("")}<div class="thread-input"><span class="prompt">${label}</span><span class="cmd"> &gt;&nbsp;</span><input id="termInput" placeholder="${placeholder}" ${t.loopType==="IMPLEMENT"&&!state.aApproved?'disabled':''}></div>`;
+ const input=$("#termInput"); if(input)input.addEventListener("keydown",e=>{if(e.key==="Enter"&&e.target.value.trim()){if(isImplementationThread()&&!state.aApproved){toast("설계루프를 먼저 확정하세요.");return}appendThreadLog(e.target.value);e.target.value="";}});
+}
+function appendThreadLog(message){
+ if(!state.threadLogs[state.thread])state.threadLogs[state.thread]=[];
+ state.threadLogs[state.thread].push(message);saveThreadLogs();renderThreadLog();
+ $("#threadLog").scrollTop=$("#threadLog").scrollHeight;
+}
+
+function render(){
+ document.querySelectorAll(".mode-btn").forEach(b=>b.classList.toggle("active",b.dataset.mode===state.mode));
+ renderContext(); renderArch(); renderDirectory(); renderRelated(); renderWorkspace(); updateTerm();
+}
+function renderContext(){
+ const el=$("#contextBar");
+ if(state.mode==="code"){
+  const waitingCount=implementationQueue().length;
+  el.innerHTML=`<span class="context-label">작업 범위</span>
+  ${["ALL","FRONT","BACK"].map(v=>`<button class="pill ${state.codeScope===v?"active":""}" data-scope="${v}">${v==="ALL"?"전체 화면":v==="FRONT"?"프론트엔드":"백엔드"}</button>`).join("")}
+  <button class="pill ${state.codeScope==="WAITING"?"active":""} ${state.aApproved?"locked":""}" data-scope="WAITING">구현대기 ${waitingCount}</button>
+  <span class="context-label">선택 화면</span>
+  <button class="pill locked">${state.screen==="ALL"?"전체":currentScreen().name}</button>`;
+  el.querySelectorAll("[data-scope]").forEach(b=>b.onclick=()=>{if(b.dataset.scope==="WAITING"&&!state.aApproved){toast("확정된 설계가 없어 구현대기 항목이 없습니다.");return}state.codeScope=b.dataset.scope;state.layer="ALL";state.method=null;render()});
+ }else{
+  const tabs=[["ALL","전체 설계"],["MOCKUP","화면 초기 목업"],["EVENT","이벤트"],["REQ","요구사항 명세"],["TABLE","테이블 정의서"],["ERD","ERD"],["API","API 계약"],["REVIEW","설계 검토"]];
+  el.innerHTML=`<span class="context-label">설계 산출물</span>${tabs.map(([v,n])=>`<button class="pill ${state.designTab===v?"active":""}" data-dtab="${v}">${n}</button>`).join("")}`;
+  el.querySelectorAll("[data-dtab]").forEach(b=>b.onclick=()=>{state.designTab=b.dataset.dtab;render()});
+ }
+}
+function renderArch(){
+ const el=$("#archBar");
+ if(state.mode==="code"){
+  if(state.codeScope==="WAITING"){el.innerHTML=`<span class="arch-label">SSOT 참조 잠금</span><button class="arch-tab active">Design Manifest → 필요한 참조만 → 구현루프</button><span class="arch-label">설계 원본은 복제하지 않고 ref 파일만 사용</span>`;return}
+  if(state.screen==="ALL"){el.innerHTML=`<span class="arch-label">흐름</span><button class="arch-tab active">화면 선택 → 계층 선택 → 파일·메서드 선택</button><span class="arch-label">프로필: ${profiles[state.profile].name}</span>`;return}
+  const ls=layers();
+  el.innerHTML=`<span class="arch-label">저장된 아키텍처</span><button class="arch-tab ${state.layer==="ALL"?"active":""}" data-layer="ALL">전체</button>`+
+  ls.map(l=>`<button class="arch-tab ${state.layer===l?"active":""}" data-layer="${l}">${l}</button>`).join("");
+  el.querySelectorAll("[data-layer]").forEach(b=>b.onclick=()=>{state.layer=b.dataset.layer;state.method=null;render()});
+ }else{
+  const ev=currentEvent();
+  el.innerHTML=`<span class="arch-label">이벤트 컨텍스트 잠금</span>
+  <button class="arch-tab ${state.event==="ALL"?"active":""}" data-event="ALL">전체 이벤트</button>
+  ${ev?`<button class="arch-tab active">${ev.id} · ${ev.name}</button>`:""}
+  <span class="arch-label">${state.event==="ALL"?"모든 설계 객체 표시":"매핑된 설계 객체만 표시"}</span>`;
+  const all=el.querySelector('[data-event="ALL"]'); if(all)all.onclick=()=>{state.event="ALL";render()};
+ }
+}
+function renderDirectory(){
+ const dir=$("#directory");
+ if(state.mode==="code"){
+  $("#directoryTitle").textContent="화면 디렉터리";
+  $("#directoryCount").textContent=`${screens.length} screens`;
+  const modules=[...new Set(screens.map(s=>s.module))];
+  dir.innerHTML=`<button class="tree-btn ${state.screen==="ALL"?"active":""}" data-screen="ALL">▦ 전체 화면<span class="meta">모든 업무 화면 카드 보기</span></button>`+
+  modules.map(m=>`<div class="tree-group"><div class="tree-title">${m}</div>${screens.filter(s=>s.module===m).map(s=>`<button class="tree-btn ${state.screen===s.id?"active":""}" data-screen="${s.id}">${s.name}<span class="meta">${s.id} · ${s.events.length} events</span></button>`).join("")}</div>`).join("");
+  dir.querySelectorAll("[data-screen]").forEach(b=>b.onclick=()=>{state.screen=b.dataset.screen;state.layer=state.screen==="ALL"?"ALL":(state.codeScope==="BACK"?profiles[state.profile].back[1]:profiles[state.profile].front[0]);state.method=null;render()});
+ }else{
+  $("#directoryTitle").textContent="화면·이벤트 디렉터리";
+  const filtered=state.screen==="ALL"?events:events.filter(e=>e.screen===state.screen);
+  $("#directoryCount").textContent=`${filtered.length} events`;
+  dir.innerHTML=`<button class="tree-btn ${state.screen==="ALL"?"active":""}" data-dscreen="ALL">▦ 전체 화면<span class="meta">전체 이벤트와 설계 산출물</span></button>`+
+  screens.map(s=>`<button class="tree-btn ${state.screen===s.id?"active":""}" data-dscreen="${s.id}">${s.name}<span class="meta">${s.events.length} events</span></button>`).join("")+
+  `<div class="tree-title">이벤트 필터</div><button class="event-filter ${state.event==="ALL"?"active":""}" data-event="ALL">전체 이벤트</button>`+
+  filtered.map(e=>`<button class="event-filter ${state.event===e.id?"active":""}" data-event="${e.id}">${e.id} · ${e.name}</button>`).join("");
+  dir.querySelectorAll("[data-dscreen]").forEach(b=>b.onclick=()=>{state.screen=b.dataset.dscreen;state.event="ALL";render()});
+  dir.querySelectorAll("[data-event]").forEach(b=>b.onclick=()=>{state.event=b.dataset.event;if(state.event!=="ALL")state.screen=currentEvent().screen;render()});
+ }
+}
+function renderRelated(){
+ const rel=$("#related");
+ if(state.mode==="code"){
+  if(state.codeScope==="WAITING"){
+   const q=implementationQueue();$("#relatedTitle").textContent="구현 SSOT 참조";$("#relatedCount").textContent=`${q.length} ready`;
+   rel.innerHTML=q.length?q.map(x=>`<div class="tree-group"><div class="tree-title">${x.event.id} · ${x.event.name}</div>${x.ssot.map(f=>`<button class="file-btn">${f}<span class="meta">read-only reference</span></button>`).join("")}</div>`).join(""):`<div class="empty-side">설계 확정 후 이벤트별 최소 SSOT 참조 파일이 표시됩니다.</div>`;return
+  }
+  $("#relatedTitle").textContent="관련 파일·메서드";
+  if(state.screen==="ALL"){ $("#relatedCount").textContent="0";rel.innerHTML=`<div class="empty-side">오른쪽 위에서 화면을 선택하면 그 화면에 속한 파일과 메서드만 표시됩니다.<br><br>다른 화면의 메서드는 컨텍스트에서 제거됩니다.</div>`;return}
+  if(state.layer==="ALL"){
+   const ls=layers();$("#relatedCount").textContent=`${ls.length} layers`;
+   rel.innerHTML=ls.map(l=>`<button class="file-btn" data-rlayer="${l}">▸ ${l}<span class="meta">${filesFor(state.screen,state.codeScope,l).length} files</span></button>`).join("");
+   rel.querySelectorAll("[data-rlayer]").forEach(b=>b.onclick=()=>{state.layer=b.dataset.rlayer;render()});return
+  }
+  const files=filesFor(state.screen,state.codeScope,state.layer); let count=files.reduce((a,f)=>a+f.methods.length,0);
+  $("#relatedCount").textContent=`${files.length} files · ${count} items`;
+  rel.innerHTML=files.map(f=>`<div class="file"><button class="file-btn">${f.file}<span class="meta">${state.layer}</span></button>${f.methods.map(m=>`<button class="method-btn ${state.method===m?"active":""}" data-method="${m}">${m}</button>`).join("")}</div>`).join("");
+  rel.querySelectorAll("[data-method]").forEach(b=>b.onclick=()=>{state.method=b.dataset.method;render()});
+ }else{
+  $("#relatedTitle").textContent="이벤트 매핑 요약";
+  const ev=currentEvent();
+  if(!ev){$("#relatedCount").textContent="ALL";rel.innerHTML=`<div class="empty-side">이벤트를 선택하면 해당 이벤트에 매핑된 요구사항, 테이블, ERD 엔터티, API 계약, 설계 검토만 추출됩니다.</div>`;return}
+  $("#relatedCount").textContent=ev.id;
+  rel.innerHTML=[
+   ["요구사항",ev.req],["테이블·ERD",ev.tables],["API 계약",ev.apis.length?ev.apis:["없음"]],["설계 검토",ev.reviews]
+  ].map(([n,a])=>`<div class="tree-group"><div class="tree-title">${n}</div>${a.map(x=>`<button class="file-btn">${x}</button>`).join("")}</div>`).join("");
+ }
+}
+function renderWorkspace(){
+ if(state.mode==="code")renderCodeWorkspace(); else renderDesignWorkspace();
+}
+function screenCards(){
+ return `<div class="hero"><div><div class="eyebrow">Screen catalog</div><h1>전체 업무 화면</h1><p class="sub">처음에는 전체 화면을 표시합니다. 화면 버튼을 누르면 선택 화면의 아키텍처·파일·메서드만 남습니다.</p></div><div class="status-badge">SCREEN CONTEXT: ALL</div></div>
+ <div class="grid">${screens.map(s=>`<article class="screen-card" data-card="${s.id}"><div class="card-top"><span class="module">${s.module}</span><span class="count">${s.events.length} events</span></div><h3>${s.name}</h3><p class="sub">${s.desc}</p><div class="tags">${s.events.map(e=>`<span class="tag">${e}</span>`).join("")}</div><div class="card-actions"><button class="mini-btn primary">화면 열기</button><button class="mini-btn">설계 보기</button></div></article>`).join("")}</div>`;
+}
+function renderCodeWorkspace(){
+ const w=$("#workspace");
+ if(state.codeScope==="WAITING"){renderImplementationWaiting(w);return}
+ if(state.screen==="ALL"){w.innerHTML=screenCards();w.querySelectorAll("[data-card]").forEach(c=>c.onclick=()=>{state.screen=c.dataset.card;state.codeScope="FRONT";state.layer=profiles[state.profile].front[0];render()});return}
+ const s=currentScreen(); const method=state.method||"화면 미리보기";
+ w.innerHTML=`<div class="hero"><div><div class="eyebrow">${s.module} · ${s.id}</div><h1>${s.name}</h1><p class="sub">${state.layer==="ALL"?"상단에서 아키텍처 계층을 선택하세요.":state.layer+" 계층에서 오른쪽 파일·메서드만 탐색 중입니다."}</p></div><div class="status-badge">SCREEN LOCKED</div></div>
+ <div class="split">
+  <section class="preview-panel"><div class="panel-head"><div class="panel-title">실행 화면 목업</div><div class="panel-tools"><button class="mini-btn">빈 상태</button><button class="mini-btn">오류 상태</button><button class="mini-btn primary">정상 상태</button></div></div><div class="panel-body">${mockBrowser(s)}</div></section>
+  <section class="code-panel"><div class="panel-head"><div class="panel-title">${state.layer} / ${method}</div><div class="panel-tools"><button class="mini-btn">복사</button><button class="mini-btn">평가</button></div></div><pre class="code">${codeSample(s,state.layer,method)}</pre></section>
+ </div>`;
+}
+function renderImplementationWaiting(w){
+ const q=implementationQueue();
+ w.innerHTML=`<div class="hero"><div><div class="eyebrow">Implementation queue</div><h1>구현대기</h1><p class="sub">설계가 확정된 이벤트만 대기열에 들어오며, 각 구현 작업은 전체 설계 복사본이 아니라 해당 이벤트에 필요한 SSOT 참조 파일만 읽습니다.</p></div><div class="status-badge">${q.length} READY</div></div>
+ <div class="implementation-queue">${q.map(x=>`<article class="queue-card ready"><div class="queue-head"><div><span class="item-id">${x.event.id}</span><div class="queue-title">${x.event.name}</div><div class="queue-meta">${x.screen.name} · designVersion 고정 · read-only SSOT refs</div></div><span class="map-chip">구현대기</span></div><div class="ssot-strip">${x.ssot.map(f=>`<span class="ssot-chip">${f}</span>`).join("")}</div><div class="queue-actions"><button class="mini-btn" data-open-design="${x.event.id}">설계 참조 보기</button><button class="mini-btn primary" data-start-implementation="${x.event.id}">구현루프 시작</button></div></article>`).join("")||`<div class="item"><p>확정된 설계가 없습니다. A 설계루프에서 설계를 확정하면 이벤트별 구현대기 항목이 생성됩니다.</p></div>`}</div>`;
+ w.querySelectorAll("[data-open-design]").forEach(b=>b.onclick=()=>{state.mode="design";state.event=b.dataset.openDesign;state.screen=currentEvent().screen;state.designTab="ALL";render()});
+ w.querySelectorAll("[data-start-implementation]").forEach(b=>b.onclick=()=>{
+  const eventId=b.dataset.startImplementation;state.event=eventId;state.screen=events.find(e=>e.id===eventId).screen;
+  const implementationThread=state.threads.find(t=>t.loopType==="IMPLEMENT");if(implementationThread)state.thread=implementationThread.id;
+  appendThreadLog(`${eventId} 구현 시작 · 이벤트 전용 SSOT ref 4개만 잠금 참조`);updateTerm();toast("해당 설계의 최소 SSOT 참조로 구현루프를 시작했습니다.");
+ });
+}
+
+function mockBrowser(s){
+ return `<div class="browser"><div class="browser-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span style="font-size:11px;margin-left:8px;color:#64748b">localhost / ${s.id.toLowerCase()}</span></div>
+ <div class="mock-page"><div class="mock-title"><h2>${s.name}</h2><span style="font-size:11px;color:#64748b">권한범위: 현재 실행조직</span></div>
+ <div class="mock-filter"><div class="field"><label>관리번호</label><input placeholder="관리번호 입력"></div><div class="field"><label>신청기관</label><select><option>전체</option><option>서해구</option></select></div><div class="field"><label>신청인</label><input placeholder="신청인명"></div><div class="field"><label>처리상태</label><select><option>전체</option><option>접수</option><option>완료</option></select></div></div>
+ <div class="mock-actions"><button>초기화</button><button class="search">조회</button></div>
+ <table class="mock-table"><thead><tr><th>번호</th><th>관리번호</th><th>신청기관</th><th>신청인</th><th>상태</th><th>처리일</th></tr></thead><tbody><tr><td>1</td><td>AGC-2026-00021</td><td>서해구</td><td>홍○동</td><td>검토중</td><td>2026-07-23</td></tr><tr><td>2</td><td>AGC-2026-00020</td><td>검단구</td><td>김○희</td><td>완료</td><td>2026-07-22</td></tr></tbody></table></div></div>`;
+}
+function codeSample(s,layer,method){
+ const mn=(method||"search()").replace(/[^\w가-힣]/g,"")||"search";
+ if(layer.includes("Controller"))return `<span class="kw">@GetMapping</span>(<span class="str">"/api/consultations"</span>)
+<span class="kw">public</span> ConsultationPageResponse <span class="fn">${mn}</span>(
+    <span class="kw">@Valid</span> ConsultationSearchRequest request
+) {
+    <span class="kw">return</span> consultationService.search(request);
+}`;
+ if(layer.includes("Service")||layer==="Application")return `<span class="kw">@Transactional</span>(readOnly = <span class="kw">true</span>)
+<span class="kw">public</span> ConsultationPageResponse <span class="fn">${mn}</span>(
+    ConsultationSearchRequest request
+) {
+    AuthenticatedUser user = userProvider.currentUser();
+    authorization.requireViewPermission(user, SCREEN_CODE);
+
+    QueryCriteria criteria =
+        criteriaFactory.create(user, request);
+
+    <span class="kw">return</span> consultationQuery.findPage(criteria);
+}`;
+ if(layer.includes("SQL")||layer.includes("Mapper"))return `<span class="cm">-- ${s.name} / ${mn}</span>
+SELECT
+    C.CONSULTATION_ID,
+    C.REQUEST_ORG_CODE,
+    C.APPLICANT_NAME,
+    C.STATUS_CODE
+FROM AGC_CONSULTATION C
+WHERE C.REQUEST_ORG_CODE IN (
+    SELECT ORG_CODE
+      FROM ORG_SCOPE
+     WHERE USER_ID = :userId
+)
+ORDER BY C.REG_DT DESC, C.CONSULTATION_ID DESC`;
+ if(layer.includes("React")||layer.includes("Component")||layer.includes("Page"))return `<span class="kw">export function</span> <span class="fn">${mn}</span>() {
+  <span class="kw">const</span> { criteria, result, loading } =
+    useConsultationScreen();
+
+  <span class="kw">return</span> (
+    &lt;ScreenLayout title=<span class="str">"${s.name}"</span>&gt;
+      &lt;SearchConditionPanel value={criteria} /&gt;
+      &lt;ResultGrid rows={result.items} loading={loading} /&gt;
+    &lt;/ScreenLayout&gt;
+  );
+}`;
+ return `<span class="cm">// ${s.id} · ${layer}</span>
+<span class="kw">function</span> <span class="fn">${mn}</span>(context) {
+  assertScreenContext(context.screenId);
+  validateMappedRequirements(context.requirements);
+  <span class="kw">return</span> executeSelectedLayer(context);
+}`;
+}
+function selectedEvents(){
+ if(state.event!=="ALL")return [currentEvent()];
+ if(state.screen!=="ALL")return events.filter(e=>e.screen===state.screen);
+ return events;
+}
+function renderDesignWorkspace(){
+ const w=$("#workspace"), es=selectedEvents(), ev=currentEvent();
+ if(state.designTab==="ALL"){w.innerHTML=designOverview(es,ev);bindEventCards();return}
+ if(state.designTab==="MOCKUP"){const sc=state.screen==="ALL"?screens[0]:currentScreen();w.innerHTML=`<div class="hero"><div><div class="eyebrow">Initial mockup</div><h1>${ev?ev.id+" 매핑 화면 목업":state.screen==="ALL"?"전체 화면 목업 카탈로그":sc.name}</h1><p class="sub">${ev?"이벤트가 사용하는 화면 상태와 조작 요소만 강조합니다.":"오른쪽에서 화면 또는 이벤트를 선택하세요."}</p></div></div>${state.screen==="ALL"?screenCards():mockBrowser(sc)}`;return}
+ if(state.designTab==="EVENT"){w.innerHTML=eventList(es);bindEventCards();return}
+ if(state.designTab==="REQ"){w.innerHTML=requirementView(es);return}
+ if(state.designTab==="TABLE"){w.innerHTML=tableView(es);return}
+ if(state.designTab==="ERD"){w.innerHTML=erdView(es);return}
+ if(state.designTab==="API"){w.innerHTML=apiView(es);return}
+ if(state.designTab==="REVIEW"){w.innerHTML=reviewView(es);return}
+}
+function designOverview(es,ev){
+ const req=[...new Set(es.flatMap(e=>e.req))],tbl=[...new Set(es.flatMap(e=>e.tables))],api=[...new Set(es.flatMap(e=>e.apis))],rev=[...new Set(es.flatMap(e=>e.reviews))];
+ return `<div class="hero"><div><div class="eyebrow">A loop traceability</div><h1>${ev?ev.id+" · "+ev.name:"전체 설계 화면"}</h1><p class="sub">${ev?"선택 이벤트에 직접 매핑된 설계 객체만 추출했습니다.":"처음에는 모든 이벤트와 모든 설계 산출물을 표시합니다. 이벤트를 누르면 모든 탭이 동시에 필터링됩니다."}</p></div><div class="status-badge">${ev?"EVENT LOCKED":"EVENT: ALL"}</div></div>
+ <div class="trace"><div class="trace-box"><b>${es.length}</b><span>이벤트</span></div><div class="trace-box"><b>${req.length}</b><span>요구사항</span></div><div class="trace-box"><b>${tbl.length}</b><span>테이블·ERD</span></div><div class="trace-box"><b>${api.length}</b><span>API 계약</span></div><div class="trace-box"><b>${rev.length}</b><span>설계 검토</span></div></div>
+ <h2 style="margin:18px 0 10px">이벤트 버튼</h2><div class="design-grid">${es.map(eventCard).join("")}</div>`;
+}
+function eventCard(e){const s=screens.find(x=>x.id===e.screen);return `<article class="event-card ${state.event===e.id?"active":""}" data-ecard="${e.id}"><div class="card-top"><span class="event-id">${e.id}</span><span class="count">${e.kind}</span></div><div class="event-name">${e.name}</div><p class="sub">${s.name}</p><div class="tags"><span class="tag">REQ ${e.req.length}</span><span class="tag">TABLE ${e.tables.length}</span><span class="tag">API ${e.apis.length}</span><span class="tag">REVIEW ${e.reviews.length}</span></div></article>`}
+function bindEventCards(){$("#workspace").querySelectorAll("[data-ecard]").forEach(c=>c.onclick=()=>{state.event=c.dataset.ecard;state.screen=currentEvent().screen;render()})}
+function eventList(es){return `<div class="hero"><div><div class="eyebrow">Events</div><h1>${state.event==="ALL"?"이벤트 전체":"선택 이벤트"}</h1><p class="sub">이벤트는 하나의 업무 결과를 만드는 수직 흐름 단위입니다.</p></div></div><div class="design-grid">${es.map(eventCard).join("")}</div>`}
+function requirementView(es){
+ const ids=[...new Set(es.flatMap(e=>e.req))], rows=requirements.filter(r=>ids.includes(r.id));
+ return `<div class="hero"><div><div class="eyebrow">Requirements</div><h1>요구사항 명세 ${state.event==="ALL"?"전체":"— "+state.event}</h1><p class="sub">현재 이벤트 필터와 연결된 요구사항만 표시합니다.</p></div></div><div class="content-list">${rows.map(r=>`<article class="item"><div class="item-head"><span class="item-id">${r.id}</span><span class="map-chip">${events.filter(e=>e.req.includes(r.id)&&es.includes(e)).map(e=>e.id).join(", ")}</span></div><h3>${r.title}</h3><p>${r.body}</p></article>`).join("")||"<div class='empty-side'>매핑된 요구사항이 없습니다.</div>"}</div>`;
+}
+function tableView(es){
+ const ids=[...new Set(es.flatMap(e=>e.tables))];
+ return `<div class="hero"><div><div class="eyebrow">Table definitions</div><h1>테이블 정의서 ${state.event==="ALL"?"전체":"— "+state.event}</h1><p class="sub">선택 이벤트가 읽거나 쓰는 테이블과 컬럼만 표시합니다.</p></div></div>${ids.map(t=>`<div class="item" style="margin-bottom:10px"><div class="item-head"><h3 style="margin:0">${t}</h3><span class="map-chip">${events.filter(e=>e.tables.includes(t)&&es.includes(e)).map(e=>e.id).join(", ")}</span></div><table class="table-def" style="margin-top:10px"><thead><tr><th>컬럼</th><th>타입</th><th>NULL</th><th>키·인덱스</th><th>설명</th></tr></thead><tbody>${(tableDefs[t]||[]).map(c=>`<tr>${c.map(x=>`<td>${x}</td>`).join("")}</tr>`).join("")}</tbody></table></div>`).join("")}`;
+}
+function erdView(es){
+ const ids=[...new Set(es.flatMap(e=>e.tables))];
+ const positions=[[35,45],[300,45],[565,45],[170,230],[450,230]];
+ return `<div class="hero"><div><div class="eyebrow">ERD subset</div><h1>ERD ${state.event==="ALL"?"전체":"— "+state.event}</h1><p class="sub">선택 이벤트와 직접 관련된 엔터티만 남긴 부분 ERD입니다.</p></div></div><div class="erd">${ids.map((t,i)=>`<div class="entity" style="left:${positions[i%positions.length][0]}px;top:${positions[i%positions.length][1]}px"><h4>${t}</h4>${(tableDefs[t]||[]).slice(0,5).map(c=>`<div>${c[3].includes("PK")?"🔑":c[3].includes("FK")?"↗":"·"} ${c[0]} : ${c[1]}</div>`).join("")}</div>`).join("")}</div>`;
+}
+function apiView(es){
+ const ids=[...new Set(es.flatMap(e=>e.apis))];
+ return `<div class="hero"><div><div class="eyebrow">API contract</div><h1>API 계약 ${state.event==="ALL"?"전체":"— "+state.event}</h1><p class="sub">선택 이벤트에서 직접 호출하는 계약만 표시합니다.</p></div></div>${ids.length?ids.map(id=>{const a=apis[id];return `<div class="api-box"><div class="api-method">${a.method}</div><div class="api-path"><b>${a.path}</b><div class="sub" style="margin-top:5px">${id} · ${a.desc}</div></div></div>`}).join(""):"<div class='item'><p>이 이벤트는 화면 내부 이동이며 직접 호출하는 API가 없습니다.</p></div>"}`;
+}
+function reviewView(es){
+ const ids=[...new Set(es.flatMap(e=>e.reviews))];
+ return `<div class="hero"><div><div class="eyebrow">Design review</div><h1>설계 검토 ${state.event==="ALL"?"전체":"— "+state.event}</h1><p class="sub">점수는 근거와 잔여 위험을 포함하며, 이벤트 필터에 맞춰 추출됩니다.</p></div></div><div class="item">${ids.map(id=>{const r=reviews[id]||["검토",96,"검토 근거"];return `<div class="review-score"><div><span class="item-id">${id}</span><br><b>${r[0]}</b></div><div><div class="scorebar"><i style="width:${r[1]}%"></i></div><div class="sub" style="margin-top:5px">${r[2]}</div></div><div class="score">${r[1]}</div></div>`}).join("")}</div>`;
+}
+
+document.querySelectorAll(".mode-btn").forEach(b=>b.onclick=()=>{state.mode=b.dataset.mode;state.layer="ALL";state.method=null;state.designTab="ALL";state.event="ALL";render()});
+$("#architectureBtn").onclick=()=>openArchitecture();
+$("#closeModal").onclick=$("#cancelProfile").onclick=()=>{state.pendingProfile=null;$("#architectureModal").classList.remove("open")};
+$("#saveBtn").onclick=()=>toast("현재 화면·설계 컨텍스트를 저장했습니다.");
+
+$("#addThreadBtn").onclick=()=>{$("#newThreadName").value="";$("#newThreadType").value="DESIGN";$("#threadModal").classList.add("open");$("#newThreadName").focus()};
+$("#closeThreadModal").onclick=$("#cancelThread").onclick=()=>$("#threadModal").classList.remove("open");
+$("#saveThread").onclick=()=>{
+ const name=$("#newThreadName").value.trim(),loopType=$("#newThreadType").value;
+ if(!name){toast("스레드 이름을 입력하세요.");return}
+ const id="T"+Date.now();state.threads.push({id,name,loopType,builtIn:false});saveThreads();state.thread=id;$("#threadModal").classList.remove("open");updateTerm();toast("스레드를 추가하고 루프 종류를 고정했습니다.");
+};
+const defaultHarness={
+ "design": {
+  "requirements": {
+   "seq": "D1",
+   "name": "요구사항 명세 에이전트",
+   "desc": "근거에서 이벤트별 구현 계약과 수용조건을 확정",
+   "file": "/harness/design/requirements-agent.md",
+   "kind": "전문 Writer",
+   "flow": "Evidence Analyst → Requirement Writer → Requirement Critic",
+   "writes": "RequirementPackage",
+   "gate": "근거 · 추적성 · 이벤트 드리프트 0",
+   "content": "# 요구사항 명세 하네스\n\nagent:\n  id: design.requirements\n  role: 요구사항 명세\n  mode: DESIGN\n  internalRoles:\n    - Evidence Analyst\n    - Requirement Writer\n    - Requirement Critic\n\nscope:\n  reads:\n    - selected-screen\n    - selected-event\n    - evidence\n    - event-manifest\n    - design-version\n  writes:\n    - RequirementPackage\n  forbidden:\n    - unrelated-screen\n    - source-code\n    - event-manifest mutation\n    - approval-state mutation\n    - 근거 없는 사실 단정\n    - 정상 흐름만 작성\n\ntools:\n  allow:\n    - evidence.search\n    - artifact.read\n    - trace.query\n  deny:\n    - repository.apply_patch\n    - shell.full_access\n\nloop:\n  pattern: Sequential + Evaluator-Optimizer\n  phases:\n    - analyze-evidence\n    - generate-requirements\n    - critic-check\n    - repair\n    - trace-regression\n  maxIterations: 3\n  absoluteMaxIterations: 5\n  noProgressLimit: 2\n\nhardGates:\n  - event-drift-zero\n  - trace-complete\n  - evidence-present\n  - failure-and-boundary-covered\n\nrubric:\n  minimumCategoryScore: 96\n  targetWeightedScore: 99\n  evidenceBeforeScore: true\n\ntokenBudget:\n  maxContextRatio: 0.80\n  deltaContextAfterFirstRun: true\n  structuredOutputOnly: true\n  unrelatedContext: forbidden\n\ninvariants:\n  - One Artifact, One Writer\n  - Many Independent Critics\n  - Design Before Code\n  - 승인된 화면·이벤트·버전 범위를 변경하지 않는다.\n\nescalation:\n  - designConflict: HUMAN\n  - eventConflict: BLOCK\n  - evidenceMissing: HUMAN\n"
+  },
+  "mockup": {
+   "seq": "D2",
+   "name": "화면 목업 에이전트",
+   "desc": "승인 이벤트를 정적 fixture와 상태별 화면으로 표현",
+   "file": "/harness/design/mockup-agent.md",
+   "kind": "전문 Writer",
+   "flow": "Interaction Mapper → Mockup Spec Writer → UX·State Critic",
+   "writes": "MockupPackage",
+   "gate": "버튼·이벤트 추가 0 · 상태 완전성",
+   "content": "# 화면 목업 하네스\n\nagent:\n  id: design.mockup\n  role: 화면 목업\n  mode: DESIGN\n  internalRoles:\n    - Interaction Mapper\n    - Mockup Spec Writer\n    - UX·State Critic\n\nscope:\n  reads:\n    - selected-screen\n    - selected-event\n    - evidence\n    - event-manifest\n    - design-version\n    - RequirementPackage\n    - MockupIntent\n  writes:\n    - MockupPackage\n  forbidden:\n    - unrelated-screen\n    - source-code\n    - event-manifest mutation\n    - approval-state mutation\n    - new-business-event\n    - unapproved-control\n    - server-authority-on-client\n\ntools:\n  allow:\n    - evidence.search\n    - artifact.read\n    - trace.query\n    - fixture.compose\n  deny:\n    - repository.apply_patch\n    - shell.full_access\n\nloop:\n  pattern: Sequential + Evaluator-Optimizer\n  phases:\n    - map-interactions\n    - write-static-fixture\n    - check-states\n    - repair-ux\n    - event-drift-regression\n  maxIterations: 3\n  absoluteMaxIterations: 5\n  noProgressLimit: 2\n\nhardGates:\n  - event-drift-zero\n  - mockup-intent-lock\n  - normal-empty-loading-error-forbidden\n  - requirement-trace-complete\n\nrubric:\n  minimumCategoryScore: 96\n  targetWeightedScore: 99\n  evidenceBeforeScore: true\n\ntokenBudget:\n  maxContextRatio: 0.80\n  deltaContextAfterFirstRun: true\n  structuredOutputOnly: true\n  unrelatedContext: forbidden\n\ninvariants:\n  - One Artifact, One Writer\n  - Many Independent Critics\n  - Design Before Code\n  - 승인된 화면·이벤트·버전 범위를 변경하지 않는다.\n\nescalation:\n  - requirementConflict: RETURN_REQUIREMENTS\n  - eventConflict: BLOCK\n  - stateUnknown: HUMAN\n"
+  },
+  "data": {
+   "seq": "D3",
+   "name": "데이터·ERD 에이전트",
+   "desc": "원천값·무결성·조회 가능성을 기준으로 부분 ERD 설계",
+   "file": "/harness/design/data-erd-agent.md",
+   "kind": "전문 Writer",
+   "flow": "Data Source Analyst → Schema Writer → Integrity Critic → Queryability Critic",
+   "writes": "DataModelPackage",
+   "gate": "PK·FK·NULL·유일성 · 이벤트 추적",
+   "content": "# 데이터·ERD 하네스\n\nagent:\n  id: design.data-erd\n  role: 데이터·ERD\n  mode: DESIGN\n  internalRoles:\n    - Data Source Analyst\n    - Schema Writer\n    - Integrity Critic\n    - Queryability Critic\n\nscope:\n  reads:\n    - selected-screen\n    - selected-event\n    - evidence\n    - event-manifest\n    - design-version\n    - RequirementPackage\n    - legacy-schema\n  writes:\n    - DataModelPackage\n  forbidden:\n    - unrelated-screen\n    - source-code\n    - event-manifest mutation\n    - approval-state mutation\n    - unnecessary-derived-storage\n    - untraced-entity\n    - sensitive-data-without-classification\n\ntools:\n  allow:\n    - evidence.search\n    - artifact.read\n    - trace.query\n    - schema.inspect\n  deny:\n    - repository.apply_patch\n    - shell.full_access\n\nloop:\n  pattern: Sequential + Evaluator-Optimizer\n  phases:\n    - analyze-sources\n    - write-schema\n    - check-integrity\n    - check-queryability\n    - event-regression\n  maxIterations: 3\n  absoluteMaxIterations: 5\n  noProgressLimit: 2\n\nhardGates:\n  - key-integrity-complete\n  - nullability-explicit\n  - sensitivity-classified\n  - read-write-event-traced\n\nrubric:\n  minimumCategoryScore: 96\n  targetWeightedScore: 99\n  evidenceBeforeScore: true\n\ntokenBudget:\n  maxContextRatio: 0.80\n  deltaContextAfterFirstRun: true\n  structuredOutputOnly: true\n  unrelatedContext: forbidden\n\ninvariants:\n  - One Artifact, One Writer\n  - Many Independent Critics\n  - Design Before Code\n  - 승인된 화면·이벤트·버전 범위를 변경하지 않는다.\n\nescalation:\n  - schemaConflict: HUMAN\n  - eventConflict: BLOCK\n  - sourceUnknown: HUMAN\n"
+  },
+  "architecture": {
+   "seq": "D4",
+   "name": "API·아키텍처 에이전트",
+   "desc": "목업·데이터 계약을 결합해 계층·보안·트랜잭션 확정",
+   "file": "/harness/design/api-architecture-agent.md",
+   "kind": "전문 Writer",
+   "flow": "Contract Designer → Layer Designer → Security·Transaction Critic → Manifest Writer",
+   "writes": "DesignManifest",
+   "gate": "계약 정합성 · 버전·해시 고정",
+   "content": "# API·아키텍처 하네스\n\nagent:\n  id: design.api-architecture\n  role: API·아키텍처\n  mode: DESIGN\n  internalRoles:\n    - Contract Designer\n    - Layer Responsibility Designer\n    - Security·Transaction Critic\n    - Architecture Manifest Writer\n\nscope:\n  reads:\n    - selected-screen\n    - selected-event\n    - evidence\n    - event-manifest\n    - design-version\n    - RequirementPackage\n    - MockupPackage\n    - DataModelPackage\n  writes:\n    - DesignManifest\n  forbidden:\n    - unrelated-screen\n    - source-code\n    - event-manifest mutation\n    - approval-state mutation\n    - layer-responsibility-mix\n    - client-authority-trust\n    - implicit-contract-change\n\ntools:\n  allow:\n    - evidence.search\n    - artifact.read\n    - trace.query\n    - contract.compare\n  deny:\n    - repository.apply_patch\n    - shell.full_access\n\nloop:\n  pattern: Sequential + Evaluator-Optimizer\n  phases:\n    - design-contracts\n    - place-layer-responsibility\n    - critic-security-transaction\n    - write-manifest\n    - cross-artifact-regression\n  maxIterations: 3\n  absoluteMaxIterations: 5\n  noProgressLimit: 2\n\nhardGates:\n  - api-data-ui-consistent\n  - authorization-explicit\n  - transaction-boundary-explicit\n  - design-version-and-hash-fixed\n\nrubric:\n  minimumCategoryScore: 96\n  targetWeightedScore: 99\n  evidenceBeforeScore: true\n\ntokenBudget:\n  maxContextRatio: 0.80\n  deltaContextAfterFirstRun: true\n  structuredOutputOnly: true\n  unrelatedContext: forbidden\n\ninvariants:\n  - One Artifact, One Writer\n  - Many Independent Critics\n  - Design Before Code\n  - 승인된 화면·이벤트·버전 범위를 변경하지 않는다.\n\nescalation:\n  - contractConflict: REPLAN\n  - eventConflict: BLOCK\n  - authorizationUnknown: HUMAN\n"
+  },
+  "review": {
+   "seq": "D5",
+   "name": "설계 검토 에이전트",
+   "desc": "독립 Reviewer를 병렬 실행하고 결함을 원인 하네스로 반환",
+   "file": "/harness/design/review-agent.md",
+   "kind": "독립 Evaluator",
+   "flow": "Requirement · Security · Data · Architecture · Testability · Operations Reviewers",
+   "writes": "DesignReviewResult",
+   "gate": "Critical·High 0 · 산출물 모순 0",
+   "content": "# 설계 검토 하네스\n\nagent:\n  id: design.review\n  role: 설계 검토\n  mode: DESIGN\n  internalRoles:\n    - Requirement Reviewer\n    - Security Reviewer\n    - Data Integrity Reviewer\n    - Architecture Reviewer\n    - Testability Reviewer\n    - Performance·Operations Reviewer\n\nscope:\n  reads:\n    - selected-screen\n    - selected-event\n    - evidence\n    - event-manifest\n    - design-version\n    - RequirementPackage\n    - MockupPackage\n    - DataModelPackage\n    - DesignManifest\n  writes:\n    - DesignReviewResult\n  forbidden:\n    - unrelated-screen\n    - source-code\n    - event-manifest mutation\n    - approval-state mutation\n    - artifact-direct-edit\n    - reviewer-score-sharing\n    - self-evaluation-trust\n\ntools:\n  allow:\n    - evidence.search\n    - artifact.read\n    - trace.query\n    - rubric.evaluate\n    - evidence.verify\n  deny:\n    - repository.apply_patch\n    - shell.full_access\n    - artifact.write\n\nloop:\n  pattern: Parallel + Evaluator-Optimizer\n  phases:\n    - parallel-independent-review\n    - merge-findings\n    - route-responsible-agent\n    - verify-repair\n    - full-design-regression\n  maxIterations: 3\n  absoluteMaxIterations: 5\n  noProgressLimit: 2\n\nhardGates:\n  - critical-high-zero\n  - cross-artifact-conflict-zero\n  - evidence-coverage-99\n  - design-snapshot-valid\n\nrubric:\n  minimumCategoryScore: 96\n  targetWeightedScore: 99\n  evidenceBeforeScore: true\n\ntokenBudget:\n  maxContextRatio: 0.80\n  deltaContextAfterFirstRun: true\n  structuredOutputOnly: true\n  unrelatedContext: forbidden\n\ninvariants:\n  - One Artifact, One Writer\n  - Many Independent Critics\n  - Design Before Code\n  - 승인된 화면·이벤트·버전 범위를 변경하지 않는다.\n\nescalation:\n  - requirementMiss: RETURN_REQUIREMENTS\n  - uiStateMiss: RETURN_MOCKUP\n  - dataIntegrity: RETURN_DATA_ERD\n  - contractMismatch: RETURN_ARCHITECTURE\n  - eventDrift: BLOCK\n"
+  }
+ },
+ "code": {
+  "frontend": {
+   "seq": "C1",
+   "name": "프론트엔드 구현 에이전트",
+   "desc": "승인 목업·API에 한정해 화면·상태·타입 구현",
+   "file": "/harness/code/frontend-agent.md",
+   "kind": "전문 Writer",
+   "flow": "Frontend Planner → Component·State Writer → Type·UX Critic",
+   "writes": "Frontend Patch",
+   "gate": "승인 목업 일치 · 허용 파일만 수정",
+   "content": "# 프론트엔드 구현 하네스\n\nagent:\n  id: code.frontend\n  role: 프론트엔드 구현\n  mode: IMPLEMENT\n  internalRoles:\n    - Frontend Planner\n    - Component·State Writer\n    - Type·UX Critic\n\nscope:\n  reads:\n    - approved-design-snapshot\n    - runtime-context-slice\n    - related-files\n    - related-symbols\n    - previous-findings\n    - approved-mockup\n    - api-contracts\n  writes:\n    - Frontend Patch\n  forbidden:\n    - saas-source\n    - unrelated-screen\n    - unapproved-design\n    - prohibited-paths\n    - server-rule-on-client\n    - unapproved-control\n    - same-file-concurrent-write\n\ntools:\n  allow:\n    - repository.read\n    - symbol.search\n    - test.run\n    - diff.inspect\n    - frontend.typecheck\n  deny:\n    - saas.repository.write\n    - unscoped.shell\n    - approval-state mutation\n\nloop:\n  pattern: Orchestrator-Workers + Evaluator-Optimizer\n  phases:\n    - plan-minimum-patch\n    - write-component-state\n    - critic-type-ux\n    - run-front-tests\n    - regression\n  maxIterations: 3\n  absoluteMaxIterations: 5\n  noProgressLimit: 2\n\nhardGates:\n  - design-snapshot-valid\n  - allowed-paths-only\n  - typecheck-pass\n  - loading-error-empty-stale-covered\n\nrubric:\n  minimumCategoryScore: 96\n  targetWeightedScore: 99\n  evidenceBeforeScore: true\n\ntokenBudget:\n  maxContextRatio: 0.80\n  deltaContextAfterFirstRun: true\n  structuredOutputOnly: true\n  unrelatedContext: forbidden\n\ninvariants:\n  - One Artifact, One Writer\n  - Many Independent Critics\n  - Design Before Code\n  - 승인된 화면·이벤트·버전 범위를 변경하지 않는다.\n\nescalation:\n  - designConflict: RETURN_TO_DESIGN\n  - pathViolation: BLOCK\n  - contractMismatch: REPLAN\n"
+  },
+  "backend": {
+   "seq": "C2",
+   "name": "백엔드 구현 에이전트",
+   "desc": "API부터 저장소 호출까지 수직슬라이스 단위 구현",
+   "file": "/harness/code/backend-agent.md",
+   "kind": "전문 Writer",
+   "flow": "Vertical Slice Planner → Backend Writer → Security·Transaction Critic",
+   "writes": "Backend Patch",
+   "gate": "인증·인가 선행 · 트랜잭션 원자성",
+   "content": "# 백엔드 구현 하네스\n\nagent:\n  id: code.backend\n  role: 백엔드 구현\n  mode: IMPLEMENT\n  internalRoles:\n    - Vertical Slice Planner\n    - Backend Writer\n    - Security·Transaction Critic\n\nscope:\n  reads:\n    - approved-design-snapshot\n    - runtime-context-slice\n    - related-files\n    - related-symbols\n    - previous-findings\n    - DesignManifest\n    - api-contracts\n    - data-contracts\n  writes:\n    - Backend Patch\n  forbidden:\n    - saas-source\n    - unrelated-screen\n    - unapproved-design\n    - prohibited-paths\n    - client-authority-trust\n    - layer-violation\n    - same-file-concurrent-write\n\ntools:\n  allow:\n    - repository.read\n    - symbol.search\n    - test.run\n    - diff.inspect\n    - backend.compile\n    - security.scan\n  deny:\n    - saas.repository.write\n    - unscoped.shell\n    - approval-state mutation\n\nloop:\n  pattern: Orchestrator-Workers + Evaluator-Optimizer\n  phases:\n    - plan-vertical-slice\n    - write-backend\n    - critic-security-transaction\n    - run-integration-tests\n    - regression\n  maxIterations: 3\n  absoluteMaxIterations: 5\n  noProgressLimit: 2\n\nhardGates:\n  - design-contract-match\n  - authorization-before-data\n  - transaction-atomic\n  - sensitive-log-zero\n\nrubric:\n  minimumCategoryScore: 96\n  targetWeightedScore: 99\n  evidenceBeforeScore: true\n\ntokenBudget:\n  maxContextRatio: 0.80\n  deltaContextAfterFirstRun: true\n  structuredOutputOnly: true\n  unrelatedContext: forbidden\n\ninvariants:\n  - One Artifact, One Writer\n  - Many Independent Critics\n  - Design Before Code\n  - 승인된 화면·이벤트·버전 범위를 변경하지 않는다.\n\nescalation:\n  - designConflict: RETURN_TO_DESIGN\n  - securityCritical: BLOCK\n  - transactionUnknown: HUMAN\n"
+  },
+  "database": {
+   "seq": "C3",
+   "name": "DB·SQL 구현 에이전트",
+   "desc": "Mapper·SQL·인덱스·무결성을 측정 근거와 함께 구현",
+   "file": "/harness/code/database-agent.md",
+   "kind": "전문 Writer",
+   "flow": "SQL Planner → Mapper·SQL Writer → Correctness·Plan Critic",
+   "writes": "Database Patch",
+   "gate": "권한조건 · 안정 정렬 · 실행계획 근거",
+   "content": "# DB·SQL 구현 하네스\n\nagent:\n  id: code.database\n  role: DB·SQL 구현\n  mode: IMPLEMENT\n  internalRoles:\n    - SQL Planner\n    - Mapper·SQL Writer\n    - Correctness·Plan Critic\n\nscope:\n  reads:\n    - approved-design-snapshot\n    - runtime-context-slice\n    - related-files\n    - related-symbols\n    - previous-findings\n    - DataModelPackage\n    - DesignManifest\n    - query-fixtures\n  writes:\n    - Database Patch\n  forbidden:\n    - saas-source\n    - unrelated-screen\n    - unapproved-design\n    - prohibited-paths\n    - unbounded-query\n    - unstable-order\n    - same-file-concurrent-write\n    - unmeasured-performance-claim\n\ntools:\n  allow:\n    - repository.read\n    - symbol.search\n    - test.run\n    - diff.inspect\n    - sql.explain\n    - schema.validate\n  deny:\n    - saas.repository.write\n    - unscoped.shell\n    - approval-state mutation\n\nloop:\n  pattern: Orchestrator-Workers + Evaluator-Optimizer\n  phases:\n    - plan-sql\n    - write-mapper-sql\n    - critic-correctness-plan\n    - run-data-tests\n    - regression\n  maxIterations: 3\n  absoluteMaxIterations: 5\n  noProgressLimit: 2\n\nhardGates:\n  - list-count-condition-match\n  - authorization-condition-present\n  - stable-order\n  - key-and-lock-integrity\n\nrubric:\n  minimumCategoryScore: 96\n  targetWeightedScore: 99\n  evidenceBeforeScore: true\n\ntokenBudget:\n  maxContextRatio: 0.80\n  deltaContextAfterFirstRun: true\n  structuredOutputOnly: true\n  unrelatedContext: forbidden\n\ninvariants:\n  - One Artifact, One Writer\n  - Many Independent Critics\n  - Design Before Code\n  - 승인된 화면·이벤트·버전 범위를 변경하지 않는다.\n\nescalation:\n  - designConflict: RETURN_TO_DESIGN\n  - dataDamageRisk: BLOCK\n  - planEvidenceMissing: REPAIR\n"
+  },
+  "test": {
+   "seq": "C4",
+   "name": "테스트 에이전트",
+   "desc": "승인 요구사항 기준으로 정상·실패·동시성·회귀 검증",
+   "file": "/harness/code/test-agent.md",
+   "kind": "독립 Test Writer",
+   "flow": "Test Scenario Designer → Test Writer → Mutation·Coverage Critic",
+   "writes": "Test Patch · TestEvidence",
+   "gate": "필수 시나리오 100% · 실패 테스트 약화 0",
+   "content": "# 테스트 하네스\n\nagent:\n  id: code.test\n  role: 테스트\n  mode: IMPLEMENT\n  internalRoles:\n    - Test Scenario Designer\n    - Test Writer\n    - Mutation·Coverage Critic\n\nscope:\n  reads:\n    - approved-design-snapshot\n    - runtime-context-slice\n    - related-files\n    - related-symbols\n    - previous-findings\n    - acceptance-criteria\n    - implementation-diff\n    - runtime-evidence\n  writes:\n    - Test Patch + TestEvidence\n  forbidden:\n    - saas-source\n    - unrelated-screen\n    - unapproved-design\n    - prohibited-paths\n    - delete-failing-test\n    - weaken-assertion\n    - meaningless-coverage-test\n\ntools:\n  allow:\n    - repository.read\n    - symbol.search\n    - test.run\n    - diff.inspect\n    - test.generate\n    - test.run\n    - mutation.run\n  deny:\n    - saas.repository.write\n    - unscoped.shell\n    - approval-state mutation\n\nloop:\n  pattern: Sequential + Evaluator-Optimizer\n  phases:\n    - design-scenarios\n    - write-tests\n    - run-failures\n    - critic-mutation-coverage\n    - full-regression\n  maxIterations: 3\n  absoluteMaxIterations: 5\n  noProgressLimit: 2\n\nhardGates:\n  - normal-and-failure-covered\n  - authorization-forgery-covered\n  - concurrency-and-rollback-covered\n  - required-tests-pass\n\nrubric:\n  minimumCategoryScore: 96\n  targetWeightedScore: 99\n  evidenceBeforeScore: true\n\ntokenBudget:\n  maxContextRatio: 0.80\n  deltaContextAfterFirstRun: true\n  structuredOutputOnly: true\n  unrelatedContext: forbidden\n\ninvariants:\n  - One Artifact, One Writer\n  - Many Independent Critics\n  - Design Before Code\n  - 승인된 화면·이벤트·버전 범위를 변경하지 않는다.\n\nescalation:\n  - designGap: RETURN_TO_DESIGN\n  - implementationDefect: RETURN_OWNER\n  - environmentBlocked: BLOCKED\n"
+  },
+  "review": {
+   "seq": "C5",
+   "name": "코드 평가 에이전트",
+   "desc": "다면 독립 평가 후 결함을 소유 구현 하네스로 재라우팅",
+   "file": "/harness/code/review-agent.md",
+   "kind": "독립 Evaluator",
+   "flow": "Functional · Security · Data · Performance · Architecture · Reliability · Scope Reviewers",
+   "writes": "CodeReviewResult · FindingPacket",
+   "gate": "Critical·High 0 · 회귀 실패 0 · 추적성 100%",
+   "content": "# 코드 평가 하네스\n\nagent:\n  id: code.review\n  role: 코드 평가\n  mode: IMPLEMENT\n  internalRoles:\n    - Functional Reviewer\n    - Security Reviewer\n    - Data·Concurrency Reviewer\n    - Performance Reviewer\n    - Architecture Reviewer\n    - Reliability Reviewer\n    - Maintainability Reviewer\n    - Scope·Patch Reviewer\n\nscope:\n  reads:\n    - approved-design-snapshot\n    - runtime-context-slice\n    - related-files\n    - related-symbols\n    - previous-findings\n    - PatchBundle\n    - test-evidence\n    - diff\n    - execution-evidence\n  writes:\n    - CodeReviewResult + FindingPacket\n  forbidden:\n    - saas-source\n    - unrelated-screen\n    - unapproved-design\n    - prohibited-paths\n    - implementation-direct-edit\n    - reviewer-score-sharing\n    - self-evaluation-trust\n\ntools:\n  allow:\n    - repository.read\n    - symbol.search\n    - test.run\n    - diff.inspect\n    - rubric.evaluate\n    - security.scan\n    - performance.measure\n    - architecture.check\n  deny:\n    - saas.repository.write\n    - unscoped.shell\n    - approval-state mutation\n    - repository.apply_patch\n\nloop:\n  pattern: Parallel + Evaluator-Optimizer\n  phases:\n    - parallel-independent-review\n    - classify-findings\n    - route-owner-agent\n    - verify-repair\n    - full-regression\n  maxIterations: 3\n  absoluteMaxIterations: 5\n  noProgressLimit: 2\n\nhardGates:\n  - approved-design-match\n  - critical-high-zero\n  - required-tests-pass\n  - scope-violation-zero\n  - traceability-100\n\nrubric:\n  minimumCategoryScore: 96\n  targetWeightedScore: 99\n  evidenceBeforeScore: true\n\ntokenBudget:\n  maxContextRatio: 0.80\n  deltaContextAfterFirstRun: true\n  structuredOutputOnly: true\n  unrelatedContext: forbidden\n\ninvariants:\n  - One Artifact, One Writer\n  - Many Independent Critics\n  - Design Before Code\n  - 승인된 화면·이벤트·버전 범위를 변경하지 않는다.\n\nescalation:\n  - frontendDefect: RETURN_FRONTEND\n  - backendDefect: RETURN_BACKEND\n  - databaseDefect: RETURN_DATABASE\n  - testGap: RETURN_TEST\n  - designConflict: RETURN_TO_DESIGN\n  - scopeViolation: BLOCK\n"
+  }
+ }
+};
+let harnessDraft=null,harnessType="design",harnessAgent="requirements";
+const HARNESS_STORAGE_KEY="ff-harness-files";
+const HARNESS_SELECTION_KEY="ff-harness-selection";
+function cloneHarness(v){return JSON.parse(JSON.stringify(v))}
+function normalizeHarness(saved){
+ if(!saved||typeof saved!=="object")return cloneHarness(defaultHarness);
+ if(typeof saved.design==="string"||typeof saved.code==="string")return cloneHarness(defaultHarness);
+ const merged=cloneHarness(defaultHarness);
+ ["design","code"].forEach(type=>Object.keys(merged[type]).forEach(id=>{
+  if(saved[type]&&saved[type][id])merged[type][id]={...merged[type][id],...saved[type][id]};
+ }));
+ return merged;
+}
+function currentHarnessAgent(){return harnessDraft[harnessType][harnessAgent]}
+function commitHarnessEditor(){if(harnessDraft&&currentHarnessAgent())currentHarnessAgent().content=$("#harnessAgentContent").value}
+function firstHarnessAgent(type){return Object.keys(harnessDraft[type])[0]}
+function saveHarnessSelection(){localStorage.setItem(HARNESS_SELECTION_KEY,JSON.stringify({type:harnessType,agent:harnessAgent}))}
+function renderHarness(){
+ const agents=harnessDraft[harnessType];
+ if(!agents[harnessAgent])harnessAgent=firstHarnessAgent(harnessType);
+ const typeLabel=harnessType==="design"?"설계":"코드";
+ $("#harnessAgentList").innerHTML=`<div class="harness-agent-title"><span>${typeLabel} 전문 에이전트 하네스</span><span class="harness-agent-count">${Object.keys(agents).length}개 고정</span></div>`+Object.entries(agents).map(([id,a])=>`<button class="harness-agent-btn ${harnessAgent===id?"active":""}" data-harness-agent="${id}"><span class="harness-seq">${a.seq}</span><span><b>${a.name}</b><span>${a.desc}</span><em>${a.kind}</em></span></button>`).join("");
+ const a=currentHarnessAgent();
+ $("#harnessFileName").textContent=a.file;
+ $("#harnessAgentKind").textContent=`${typeLabel} 하네스 · ${a.kind}`;
+ $("#harnessAgentFlow").textContent=a.flow;
+ $("#harnessAgentWrites").textContent=a.writes;
+ $("#harnessAgentGate").textContent=a.gate;
+ $("#harnessAgentContent").value=a.content;
+ $("#harnessAgentList").querySelectorAll("[data-harness-agent]").forEach(b=>b.onclick=()=>{commitHarnessEditor();harnessAgent=b.dataset.harnessAgent;saveHarnessSelection();renderHarness()});
+ document.querySelectorAll("[data-harness]").forEach(x=>x.classList.toggle("active",x.dataset.harness===harnessType));
+ saveHarnessSelection();
+}
+function openHarness(){
+ harnessDraft=normalizeHarness(JSON.parse(localStorage.getItem(HARNESS_STORAGE_KEY)||"null"));
+ let selected={};try{selected=JSON.parse(localStorage.getItem(HARNESS_SELECTION_KEY)||"{}")}catch(e){}
+ harnessType=selected.type&&harnessDraft[selected.type]?selected.type:"design";
+ harnessAgent=selected.agent&&harnessDraft[harnessType][selected.agent]?selected.agent:firstHarnessAgent(harnessType);
+ renderHarness();$("#harnessModal").classList.add("open");
+}
+$("#harnessFileBtn").onclick=openHarness;
+$("#closeHarnessModal").onclick=$("#cancelHarness").onclick=()=>$("#harnessModal").classList.remove("open");
+document.querySelectorAll("[data-harness]").forEach(b=>b.onclick=()=>{commitHarnessEditor();harnessType=b.dataset.harness;harnessAgent=firstHarnessAgent(harnessType);saveHarnessSelection();renderHarness()});
+$("#resetHarness").onclick=()=>{harnessDraft[harnessType][harnessAgent]=cloneHarness(defaultHarness[harnessType][harnessAgent]);renderHarness();toast("선택한 하네스 파일을 기본값으로 복원했습니다.")};
+$("#saveHarness").onclick=()=>{commitHarnessEditor();localStorage.setItem(HARNESS_STORAGE_KEY,JSON.stringify(harnessDraft));saveHarnessSelection();$("#harnessModal").classList.remove("open");toast("에이전트 하네스를 저장했습니다.")};
+function refreshProfileGrid(){
+ const grid=$("#profileGrid");
+ grid.innerHTML=Object.entries(profiles).map(([id,p])=>`<div class="profile ${id===state.pendingProfile?"active":""}" data-profile="${id}"><h3>${p.name}</h3><p>${p.desc}</p>${customProfiles[id]?`<button class="profile-delete" data-delete="${id}">등록 프로필 삭제</button>`:""}</div>`).join("");
+ grid.querySelectorAll("[data-profile]").forEach(x=>x.onclick=e=>{if(e.target.dataset.delete)return;state.pendingProfile=x.dataset.profile;refreshProfileGrid();renderProfileLayers()});
+ grid.querySelectorAll("[data-delete]").forEach(x=>x.onclick=e=>{e.stopPropagation();delete customProfiles[x.dataset.delete];localStorage.setItem("ff-custom-profiles",JSON.stringify(customProfiles));profiles={...builtInProfiles,...customProfiles};if(state.pendingProfile===x.dataset.delete)state.pendingProfile="layered";refreshProfileGrid();renderProfileLayers();toast("등록 프로필을 삭제했습니다.")});
+}
+function renderProfileLayers(){const p=profiles[state.pendingProfile]||profiles.layered;$("#profileLayers").innerHTML=`<span class="layer-chip">프론트</span>${p.front.map(x=>`<span class="layer-chip">${x}</span>`).join("")}<span class="layer-chip">백엔드</span>${p.back.map(x=>`<span class="layer-chip">${x}</span>`).join("")}`}
+function openArchitecture(){
+ if(!state.pendingProfile)state.pendingProfile=state.profile;
+ refreshProfileGrid();renderProfileLayers();$("#profileForm").classList.remove("open");$("#architectureModal").classList.add("open");
+}
+$("#newProfileBtn").onclick=()=>{$("#profileForm").classList.add("open");$("#customProfileName").focus()};
+$("#cancelNewProfile").onclick=()=>$("#profileForm").classList.remove("open");
+$("#saveNewProfile").onclick=()=>{
+ const name=$("#customProfileName").value.trim(),desc=$("#customProfileDesc").value.trim();
+ const front=$("#customFrontLayers").value.split(/\n|,/).map(x=>x.trim()).filter(Boolean);
+ const back=$("#customBackLayers").value.split(/\n|,/).map(x=>x.trim()).filter(Boolean);
+ if(!name||!front.length||!back.length){toast("프로필 이름과 프론트·백엔드 계층을 입력하세요.");return}
+ const id="custom-"+Date.now();customProfiles[id]={name,desc:desc||"사용자 등록 아키텍처",front,back};
+ localStorage.setItem("ff-custom-profiles",JSON.stringify(customProfiles));profiles={...builtInProfiles,...customProfiles};state.pendingProfile=id;
+ ["customProfileName","customProfileDesc","customFrontLayers","customBackLayers"].forEach(i=>$("#"+i).value="");$("#profileForm").classList.remove("open");refreshProfileGrid();renderProfileLayers();toast("새 아키텍처 프로필을 등록했습니다.");
+};
+$("#applyProfile").onclick=()=>{state.profile=state.pendingProfile;localStorage.setItem("ff-profile",state.profile);state.layer="ALL";$("#architectureModal").classList.remove("open");toast("아키텍처 프로필을 적용했습니다.");render()};
+render();
+</script>
+</body>
+</html>

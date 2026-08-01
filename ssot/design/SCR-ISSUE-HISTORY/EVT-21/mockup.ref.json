@@ -1,0 +1,25 @@
+﻿{
+    "version":  1,
+    "screenId":  "SCR-ISSUE-HISTORY",
+    "eventId":  "EVT-21",
+    "eventName":  "발급내역 초기 조회",
+    "eventKind":  "QUERY",
+    "status":  "DRAFT",
+    "sourceRefs":  [
+                       "contracts/event-manifest.json"
+                   ],
+    "contentHash":  "b64cce688bc61281abce49942693241c81d660580035b938889fd85fc93ee656",
+    "states":  [
+                   "NORMAL",
+                   "EMPTY",
+                   "LOADING",
+                   "ERROR",
+                   "FORBIDDEN"
+               ],
+    "controls":  [
+
+                 ],
+    "fixture":  {
+
+                }
+}

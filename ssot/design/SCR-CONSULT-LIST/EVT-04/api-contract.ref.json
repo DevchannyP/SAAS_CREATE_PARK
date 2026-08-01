@@ -1,0 +1,13 @@
+﻿{
+    "version":  1,
+    "screenId":  "SCR-CONSULT-LIST",
+    "eventId":  "EVT-04",
+    "eventName":  "조회 결과 상세 이동",
+    "eventKind":  "NAVIGATION",
+    "status":  "DRAFT",
+    "sourceRefs":  [
+                       "contracts/event-manifest.json"
+                   ],
+    "contentHash":  "8b2148f9e8b6be525564c6b15627c31288d80addffec4d9c4127ff3b05608545",
+    "operations":  null
+}

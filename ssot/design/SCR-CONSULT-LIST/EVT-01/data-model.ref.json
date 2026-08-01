@@ -1,0 +1,17 @@
+﻿{
+    "version":  1,
+    "screenId":  "SCR-CONSULT-LIST",
+    "eventId":  "EVT-01",
+    "eventName":  "화면 초기화",
+    "eventKind":  "QUERY",
+    "status":  "DRAFT",
+    "sourceRefs":  [
+                       "contracts/event-manifest.json"
+                   ],
+    "contentHash":  "98cf343757a15c3153f5540a29860eeeb5dd2aa90bc70f5cc42304aa7907ab20",
+    "entities":  [
+
+                 ],
+    "readEvents":  "EVT-01",
+    "writeEvents":  null
+}

@@ -1,0 +1,17 @@
+﻿{
+    "version":  1,
+    "screenId":  "SCR-COMMON-CODE",
+    "eventId":  "EVT-42",
+    "eventName":  "상세코드 저장",
+    "eventKind":  "COMMAND",
+    "status":  "DRAFT",
+    "sourceRefs":  [
+                       "contracts/event-manifest.json"
+                   ],
+    "contentHash":  "b12aec8720d37562f1471cebf34b0b11e282f1ce7e603f281f1fa7116d48a8da",
+    "entities":  [
+
+                 ],
+    "readEvents":  null,
+    "writeEvents":  "EVT-42"
+}

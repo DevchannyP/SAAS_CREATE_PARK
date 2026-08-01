@@ -1,0 +1,24 @@
+spring:
+  datasource:
+    url: ${FORGEFLOW_DB_URL:jdbc:postgresql://localhost:5432/forgeflow}
+    username: ${FORGEFLOW_DB_USER:forgeflow}
+    password: ${FORGEFLOW_DB_PASSWORD:forgeflow_dev}
+  flyway:
+    enabled: true
+server:
+  error:
+    include-message: never
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+forgeflow:
+  control-root: ${FORGEFLOW_CONTROL_ROOT:.}
+  run-root: ${FORGEFLOW_RUN_ROOT:./run-data}
+  target-roots: ${FORGEFLOW_TARGET_ROOTS:}
+  gateway-token: ${FORGEFLOW_GATEWAY_TOKEN:forgeflow_gateway_local_only}
+  worker:
+    mode: ${FORGEFLOW_WORKER_MODE:fake}
+    docker-executable: ${FORGEFLOW_DOCKER_EXECUTABLE:docker}
+    image: ${FORGEFLOW_WORKER_IMAGE:}

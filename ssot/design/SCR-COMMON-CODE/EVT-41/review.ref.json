@@ -1,0 +1,16 @@
+﻿{
+    "version":  1,
+    "screenId":  "SCR-COMMON-CODE",
+    "eventId":  "EVT-41",
+    "eventName":  "코드그룹 조회",
+    "eventKind":  "QUERY",
+    "status":  "DRAFT",
+    "sourceRefs":  [
+                       "contracts/event-manifest.json"
+                   ],
+    "contentHash":  "4885f0993ac317876c0bfd66598cef0d4295482fe244628364888568940e5c56",
+    "findings":  [
+
+                 ],
+    "hardGate":  "PENDING_EVIDENCE"
+}
