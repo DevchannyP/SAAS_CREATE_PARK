@@ -17,18 +17,21 @@ services:
       FORGEFLOW_RUN_ROOT: /runs
       FORGEFLOW_GATEWAY_TOKEN: ${FORGEFLOW_GATEWAY_TOKEN:?FORGEFLOW_GATEWAY_TOKEN must be set}
       YOUTUBE_ORCHESTRATOR_URL: http://youtube-orchestrator:8090
+      YOUTUBE_MAGAZINE_OUTPUT_ROOT: /magazine-output
     depends_on:
       db: {condition: service_healthy}
       youtube-orchestrator: {condition: service_healthy}
-    volumes: [forgeflow-runs:/runs, forgeflow-targets:/targets]
+    volumes: [forgeflow-runs:/runs, forgeflow-targets:/targets, youtube-magazine-output:/magazine-output:ro]
   youtube-orchestrator:
     build: ./orchestrator
     environment:
       YOUTUBE_COLLECTOR_MODE: ${YOUTUBE_COLLECTOR_MODE:-demo}
       YOUTUBE_API_KEY: ${YOUTUBE_API_KEY:-}
+      MAGAZINE_OUTPUT_ROOT: /output
     healthcheck: {test: ["CMD","python","-c","import urllib.request; urllib.request.urlopen('http://localhost:8090/health')"], interval: 5s, timeout: 3s, retries: 20}
     read_only: true
     tmpfs: [/tmp]
+    volumes: [youtube-magazine-output:/output]
   web:
     build: ./frontend
     environment:
@@ -39,3 +42,4 @@ volumes:
   forgeflow-db:
   forgeflow-runs:
   forgeflow-targets:
+  youtube-magazine-output:
