@@ -8,10 +8,15 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/v1/youtube-magazine")
 public class YoutubeMagazineController {
- private final JdbcTemplate db;
- YoutubeMagazineController(JdbcTemplate db){this.db=db;}
+ private final JdbcTemplate db;private final YoutubeMagazineCollectionService collection;
+ YoutubeMagazineController(JdbcTemplate db,YoutubeMagazineCollectionService collection){this.db=db;this.collection=collection;}
 
  record CreateJob(String groupId,String format){}
+ record CollectRequest(String regionCode,String categoryId,Integer maxResults){}
+
+ @PostMapping("/collect") Map<String,Object> collect(@RequestBody(required=false) CollectRequest request){
+  return collection.collect(request==null?"KR":request.regionCode(),request==null?"24":request.categoryId(),request==null||request.maxResults()==null?18:request.maxResults());
+ }
 
  @GetMapping("/jobs") List<Map<String,Object>> jobs(){
   return db.queryForList("select id,group_id as groupId,status,stage,progress,format,privacy_status as privacyStatus,quality_score as qualityScore,risk_score as riskScore,output_path as outputPath,created_at as createdAt,updated_at as updatedAt from youtube_magazine_job order by created_at desc");

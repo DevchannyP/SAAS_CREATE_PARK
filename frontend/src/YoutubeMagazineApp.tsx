@@ -1,17 +1,19 @@
 import{useEffect,useState}from"react";
 import{api,type MagazineGroup,type MagazineJob,type MagazineVideo}from"./api";
 import"./youtube-magazine.css";
+import"./youtube-magazine-actions.css";
 
 const stages=["수집","그룹화","랭킹","핫파트","대본","스케치","TTS","편집","품질검사","업로드"];
 
 export function YoutubeMagazineApp(){
- const[jobs,setJobs]=useState<MagazineJob[]>([]),[videos,setVideos]=useState<MagazineVideo[]>([]),[groups,setGroups]=useState<MagazineGroup[]>([]),[busy,setBusy]=useState(false),[error,setError]=useState("");
+ const[jobs,setJobs]=useState<MagazineJob[]>([]),[videos,setVideos]=useState<MagazineVideo[]>([]),[groups,setGroups]=useState<MagazineGroup[]>([]),[busy,setBusy]=useState(false),[error,setError]=useState(""),[notice,setNotice]=useState("");
  const load=()=>Promise.all([api.magazineJobs(),api.magazineVideos(),api.magazineGroups()]).then(([j,v,g])=>{setJobs(j);setVideos(v);setGroups(g)}).catch(e=>setError(e.message));
  useEffect(()=>{load()},[]);
- const command=async(action:()=>Promise<MagazineJob>)=>{setBusy(true);setError("");try{await action();await load()}catch(e){setError(e instanceof Error?e.message:"요청 실패")}finally{setBusy(false)}};
+ const command=async(action:()=>Promise<unknown>,message?:string)=>{setBusy(true);setError("");setNotice("");try{await action();await load();if(message)setNotice(message)}catch(e){setError(e instanceof Error?e.message:"요청 실패")}finally{setBusy(false)}};
  return <div className="ymApp">
-  <header className="ymHeader"><div><a href="/">← ForgeFlow</a><small>ISOLATED CONTENT PIPELINE</small><h1>YouTube Hot 6</h1><p>메타데이터 기반 랭킹 매거진 제작 콘솔</p></div><button disabled={busy} onClick={()=>command(()=>api.createMagazineJob("SHORTS"))}>+ 테스트 작업 생성</button></header>
+  <header className="ymHeader"><div><a href="/">← ForgeFlow</a><small>ISOLATED CONTENT PIPELINE</small><h1>YouTube Hot 6</h1><p>메타데이터 기반 랭킹 매거진 제작 콘솔</p></div><div className="ymActions"><button className="secondary" disabled={busy} onClick={()=>command(()=>api.collectMagazineVideos(),"수집·랭킹·TOP 6 그룹 생성 완료")}>인기 영상 수집</button><button disabled={busy||groups.length===0} onClick={()=>command(()=>api.createMagazineJob("SHORTS",groups[0]?.id),"최신 TOP 6 제작 작업 생성 완료")}>+ 제작 작업 생성</button></div></header>
   {error&&<div className="ymError">{error}</div>}
+  {notice&&<div className="ymNotice">{notice}</div>}
   <section className="ymPolicy"><b>안전 모드</b><span>원본 영상 다운로드 금지</span><span>스케치 신규 생성</span><span>기본 비공개</span><span>승인 후 업로드</span></section>
   <section className="ymPipeline">{stages.map((stage,index)=><div key={stage}><i>{index+1}</i><span>{stage}</span></div>)}</section>
   <main className="ymGrid">

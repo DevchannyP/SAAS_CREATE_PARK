@@ -16,8 +16,19 @@ services:
       FORGEFLOW_CONTROL_ROOT: /control-unmounted
       FORGEFLOW_RUN_ROOT: /runs
       FORGEFLOW_GATEWAY_TOKEN: ${FORGEFLOW_GATEWAY_TOKEN:?FORGEFLOW_GATEWAY_TOKEN must be set}
-    depends_on: {db: {condition: service_healthy}}
+      YOUTUBE_ORCHESTRATOR_URL: http://youtube-orchestrator:8090
+    depends_on:
+      db: {condition: service_healthy}
+      youtube-orchestrator: {condition: service_healthy}
     volumes: [forgeflow-runs:/runs, forgeflow-targets:/targets]
+  youtube-orchestrator:
+    build: ./orchestrator
+    environment:
+      YOUTUBE_COLLECTOR_MODE: ${YOUTUBE_COLLECTOR_MODE:-demo}
+      YOUTUBE_API_KEY: ${YOUTUBE_API_KEY:-}
+    healthcheck: {test: ["CMD","python","-c","import urllib.request; urllib.request.urlopen('http://localhost:8090/health')"], interval: 5s, timeout: 3s, retries: 20}
+    read_only: true
+    tmpfs: [/tmp]
   web:
     build: ./frontend
     environment:

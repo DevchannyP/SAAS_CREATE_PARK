@@ -37,3 +37,7 @@ All commands inherit ForgeFlow's trusted-gateway, request ID, actor, and idempot
 ## Next adapters
 
 Implement each disabled DSL stage behind its existing engine namespace. Pass artifacts between stages using a per-job workspace outside the current ForgeFlow control root. The Spring API should submit jobs and read sanitized status/artifact metadata; it should not execute FFmpeg or OAuth operations in-process.
+
+## Implemented MVP collection path
+
+The isolated `youtube-orchestrator` service now supports demo and live collection modes. The management API calls it through the internal Compose network, persists every collected candidate, and creates a six-item ranked group with duplicate channels removed. The console exposes this flow through the **인기 영상 수집** button. Demo mode is the default; live mode is opt-in through environment configuration.

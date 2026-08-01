@@ -22,3 +22,5 @@ forgeflow:
     mode: ${FORGEFLOW_WORKER_MODE:fake}
     docker-executable: ${FORGEFLOW_DOCKER_EXECUTABLE:docker}
     image: ${FORGEFLOW_WORKER_IMAGE:}
+youtube-magazine:
+  orchestrator-url: ${YOUTUBE_ORCHESTRATOR_URL:http://localhost:8090}
