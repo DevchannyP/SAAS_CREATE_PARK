@@ -8,8 +8,8 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/v1/youtube-magazine")
 public class YoutubeMagazineController {
- private final JdbcTemplate db;private final YoutubeMagazineCollectionService collection;private final YoutubeMagazineGenerationService generation;
- YoutubeMagazineController(JdbcTemplate db,YoutubeMagazineCollectionService collection,YoutubeMagazineGenerationService generation){this.db=db;this.collection=collection;this.generation=generation;}
+ private final JdbcTemplate db;private final YoutubeMagazineCollectionService collection;
+ YoutubeMagazineController(JdbcTemplate db,YoutubeMagazineCollectionService collection){this.db=db;this.collection=collection;}
 
  record CreateJob(String groupId,String format){}
  record CollectRequest(String regionCode,String categoryId,Integer maxResults){}
@@ -19,13 +19,11 @@ public class YoutubeMagazineController {
  }
 
  @GetMapping("/jobs") List<Map<String,Object>> jobs(){
-  return db.queryForList("select id,group_id as \"groupId\",status,stage,progress,format,privacy_status as \"privacyStatus\",quality_score as \"qualityScore\",risk_score as \"riskScore\",output_path as \"outputPath\",created_at as \"createdAt\",updated_at as \"updatedAt\" from youtube_magazine_job order by created_at desc");
+  return db.queryForList("select id,group_id as groupId,status,stage,progress,format,privacy_status as privacyStatus,quality_score as qualityScore,risk_score as riskScore,output_path as outputPath,created_at as createdAt,updated_at as updatedAt from youtube_magazine_job order by created_at desc");
  }
  @GetMapping("/jobs/{id}") Map<String,Object> job(@PathVariable UUID id){
-  return db.queryForMap("select id,group_id as \"groupId\",status,stage,progress,format,privacy_status as \"privacyStatus\",quality_score as \"qualityScore\",risk_score as \"riskScore\",output_path as \"outputPath\",created_at as \"createdAt\",updated_at as \"updatedAt\" from youtube_magazine_job where id=?",id);
+  return db.queryForMap("select id,group_id as groupId,status,stage,progress,format,privacy_status as privacyStatus,quality_score as qualityScore,risk_score as riskScore,output_path as outputPath,created_at as createdAt,updated_at as updatedAt from youtube_magazine_job where id=?",id);
  }
- @PostMapping("/jobs/{id}/generate") Map<String,Object> generate(@PathVariable UUID id){return generation.generate(id);}
- @GetMapping("/jobs/{id}/artifacts") List<Map<String,Object>> artifacts(@PathVariable UUID id){return generation.artifacts(id);}
  @Transactional @PostMapping("/jobs") Map<String,Object> create(@RequestBody(required=false) CreateJob request){
   UUID id=UUID.randomUUID();UUID groupId=request==null||request.groupId()==null||request.groupId().isBlank()?null:UUID.fromString(request.groupId());
   String format=request==null||request.format()==null?"SHORTS":request.format().toUpperCase(Locale.ROOT);
@@ -42,9 +40,9 @@ public class YoutubeMagazineController {
   if(changed==0)throw new IllegalStateException("Approval is required before upload preparation");return job(id);
  }
  @GetMapping("/videos") List<Map<String,Object>> videos(){
-  return db.queryForList("select id,video_id as \"videoId\",title,channel_title as \"channelTitle\",category_id as \"categoryId\",published_at as \"publishedAt\",view_count as \"viewCount\",like_count as \"likeCount\",comment_count as \"commentCount\",hot_score as \"hotScore\",thumbnail_url as \"thumbnailUrl\",collected_at as \"collectedAt\" from youtube_magazine_video order by hot_score desc");
+  return db.queryForList("select id,video_id as videoId,title,channel_title as channelTitle,category_id as categoryId,published_at as publishedAt,view_count as viewCount,like_count as likeCount,comment_count as commentCount,hot_score as hotScore,thumbnail_url as thumbnailUrl,collected_at as collectedAt from youtube_magazine_video order by hot_score desc");
  }
  @GetMapping("/groups") List<Map<String,Object>> groups(){
-  return db.queryForList("select g.id,g.group_title as \"groupTitle\",g.category_id as \"categoryId\",g.topic_keyword as \"topicKeyword\",g.created_at as \"createdAt\",count(i.id) as \"itemCount\" from youtube_magazine_group g left join youtube_magazine_group_item i on i.group_id=g.id group by g.id order by g.created_at desc");
+  return db.queryForList("select g.id,g.group_title as groupTitle,g.category_id as categoryId,g.topic_keyword as topicKeyword,g.created_at as createdAt,count(i.id) as itemCount from youtube_magazine_group g left join youtube_magazine_group_item i on i.group_id=g.id group by g.id order by g.created_at desc");
  }
 }
